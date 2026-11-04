@@ -1,0 +1,2206 @@
+<!DOCTYPE html>
+<html lang="id" data-bs-theme="dark">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3NET Customer Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#040a1c; --neon:#19c3ff; --electric:#2f6bff;
+      --ink:#e8f1ff; --muted:#8fa6c9;
+      --ok:#2ee6a6; --warn:#ffc857; --bad:#ff5c7a;
+      --glass:rgba(255,255,255,.055); --line:rgba(110,190,255,.2);
+      --r:18px; --r-sm:12px;
+    }
+    *{box-sizing:border-box}
+    body{
+      font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+      color:var(--ink); background:var(--bg); min-height:100vh; margin:0;
+    }
+    .bg-orbs{
+      position:fixed; inset:0; z-index:-1;
+      background:
+        radial-gradient(900px 500px at 8% -10%, rgba(25,195,255,.24), transparent 60%),
+        radial-gradient(700px 520px at 100% 8%, rgba(47,107,255,.26), transparent 60%),
+        radial-gradient(600px 420px at 50% 112%, rgba(25,195,255,.14), transparent 60%),
+        var(--bg);
+    }
+    .glass{
+      background:var(--glass);
+      -webkit-backdrop-filter:blur(18px) saturate(140%);
+      backdrop-filter:blur(18px) saturate(140%);
+      border:1px solid var(--line);
+      border-radius:var(--r);
+      box-shadow:0 10px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+    }
+
+    /* ---------- Layout CRM ---------- */
+    .shell{
+      display:grid; grid-template-columns:232px minmax(0,1fr); grid-template-rows:auto 1fr;
+      gap:16px; padding:16px; min-height:100vh; max-width:1500px; margin:0 auto;
+    }
+    .topbar{
+      grid-column:1/-1; position:sticky; top:12px; z-index:30;
+      display:flex; align-items:center; gap:16px; padding:10px 18px;
+    }
+    .brand{display:flex; align-items:center; gap:12px; min-width:0}
+    .brand img{
+      height:46px; width:auto; max-width:140px; object-fit:contain;
+      filter:drop-shadow(0 0 10px rgba(25,195,255,.65)) drop-shadow(0 0 22px rgba(47,107,255,.45));
+    }
+    .brand-fallback{
+      display:none; font-weight:800; font-size:1.7rem; letter-spacing:.02em; color:var(--neon);
+      text-shadow:0 0 14px rgba(25,195,255,.85), 0 0 34px rgba(47,107,255,.6);
+    }
+    .brand-text{line-height:1.15; min-width:0}
+    .brand-text strong{display:block; font-size:1.02rem; font-weight:700}
+    .brand-text span{font-size:.78rem; color:var(--muted)}
+    .top-right{margin-left:auto; display:flex; align-items:center; gap:10px}
+    .chip{
+      display:inline-flex; align-items:center; gap:8px; padding:7px 13px; border-radius:999px;
+      border:1px solid var(--line); background:rgba(25,195,255,.08); font-size:.84rem; font-weight:600; white-space:nowrap;
+    }
+    .chip i{color:var(--neon)}
+
+    .sidebar{position:sticky; top:96px; align-self:start; padding:12px}
+    .nav-item{
+      display:flex; align-items:center; gap:12px; width:100%; padding:11px 14px; margin-bottom:6px;
+      background:transparent; border:1px solid transparent; border-radius:var(--r-sm);
+      color:var(--muted); font:inherit; font-weight:600; text-align:left; cursor:pointer;
+      transition:background .2s,color .2s,border-color .2s,box-shadow .2s;
+    }
+    .nav-item i{font-size:1.1rem}
+    .nav-item:hover{color:var(--ink); background:rgba(255,255,255,.05)}
+    .nav-item:focus-visible{outline:2px solid var(--neon); outline-offset:2px}
+    .nav-item.active{
+      color:#fff; background:linear-gradient(135deg,rgba(25,195,255,.2),rgba(47,107,255,.2));
+      border-color:rgba(25,195,255,.5); box-shadow:0 0 18px rgba(25,195,255,.2);
+    }
+    .nav-item.active i{color:var(--neon)}
+
+    .content{min-width:0}
+    .page-head{margin-bottom:16px}
+    .page-head h1{font-size:1.5rem; font-weight:800; margin:0}
+    .page-head p{margin:2px 0 0; color:var(--muted); font-size:.92rem}
+
+    /* ---------- Statistik ---------- */
+    .stat{padding:18px; height:100%; position:relative; overflow:hidden}
+    .stat .ico{
+      width:42px; height:42px; border-radius:12px; display:grid; place-items:center; font-size:1.2rem;
+      color:var(--neon); background:rgba(25,195,255,.12); border:1px solid rgba(25,195,255,.35);
+      box-shadow:0 0 16px rgba(25,195,255,.25);
+    }
+    .stat .val{font-size:2rem; font-weight:800; line-height:1.1; margin-top:12px}
+    .stat .lbl{color:var(--muted); font-size:.86rem; margin-top:2px}
+    .shimmer{color:transparent!important; border-radius:8px; background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.16),rgba(255,255,255,.06)); background-size:200% 100%; animation:shim 1.2s linear infinite}
+    @keyframes shim{to{background-position:-200% 0}}
+
+    .panel{padding:20px}
+    .panel h2{font-size:1.05rem; font-weight:700; margin:0 0 14px}
+    .bar-row{margin-bottom:14px}
+    .bar-row .top{display:flex; justify-content:space-between; font-size:.88rem; margin-bottom:6px}
+    .bar-row .top span:last-child{color:var(--muted)}
+    .bar-track{height:9px; border-radius:99px; background:rgba(255,255,255,.07); overflow:hidden}
+    .bar-fill{height:100%; border-radius:99px; background:linear-gradient(90deg,var(--electric),var(--neon)); box-shadow:0 0 12px rgba(25,195,255,.7); transition:width .7s cubic-bezier(.2,.8,.2,1)}
+
+    /* ---------- Tabel ---------- */
+    .table{
+      --bs-table-bg:transparent; --bs-table-color:var(--ink);
+      --bs-table-hover-bg:rgba(25,195,255,.07); --bs-table-hover-color:var(--ink);
+      --bs-table-border-color:var(--line); margin:0; font-size:.9rem;
+    }
+    .table thead th{color:var(--muted); font-weight:600; font-size:.82rem; border-bottom-color:var(--line); white-space:nowrap}
+    .table td{vertical-align:middle}
+    .cid{font-weight:700; color:var(--neon); white-space:nowrap}
+    .sub{display:block; color:var(--muted); font-size:.8rem}
+    .badge-s{display:inline-block; padding:4px 11px; border-radius:99px; font-size:.78rem; font-weight:700; border:1px solid}
+    .badge-s.aktif{color:var(--ok); border-color:rgba(46,230,166,.45); background:rgba(46,230,166,.1)}
+    .badge-s.isolir{color:var(--warn); border-color:rgba(255,200,87,.45); background:rgba(255,200,87,.1)}
+    .badge-s.nonaktif{color:var(--bad); border-color:rgba(255,92,122,.45); background:rgba(255,92,122,.1)}
+    .empty{padding:36px 12px; text-align:center; color:var(--muted)}
+    .empty i{font-size:2rem; color:var(--neon); display:block; margin-bottom:8px}
+
+    /* ---------- Form ---------- */
+    .form-card{position:relative; padding:24px; overflow:hidden}
+    .form-label{font-weight:600; font-size:.88rem; margin-bottom:6px}
+    .form-control,.form-select{
+      background:rgba(4,12,34,.55); border:1px solid var(--line); color:var(--ink);
+      border-radius:var(--r-sm); padding:.7rem .9rem;
+    }
+    .form-control::placeholder{color:rgba(143,166,201,.6)}
+    .form-control:focus,.form-select:focus{
+      background:rgba(4,12,34,.78); color:var(--ink); border-color:var(--neon);
+      box-shadow:0 0 0 .2rem rgba(25,195,255,.16), 0 0 20px rgba(25,195,255,.28);
+    }
+    .form-select option{background:#0a1530; color:var(--ink)}
+    .form-control[readonly]{background:rgba(25,195,255,.06); color:#cfe9ff}
+    .id-field{font-weight:800; color:var(--neon)!important; letter-spacing:.03em; text-shadow:0 0 12px rgba(25,195,255,.7); border-color:rgba(25,195,255,.5)}
+    .form-text{color:var(--muted)}
+
+    .btn-neon{
+      border:0; color:#021024; font-weight:800; padding:.8rem 1.6rem; border-radius:var(--r-sm);
+      background:linear-gradient(135deg,var(--neon),var(--electric));
+      box-shadow:0 0 22px rgba(25,195,255,.5), 0 8px 24px rgba(47,107,255,.35);
+      transition:transform .15s, box-shadow .2s, filter .2s;
+    }
+    .btn-neon:hover{color:#021024; transform:translateY(-1px); box-shadow:0 0 30px rgba(25,195,255,.75), 0 10px 28px rgba(47,107,255,.45)}
+    .btn-neon:disabled{filter:saturate(.6) brightness(.9); transform:none}
+    .btn-ghost{background:rgba(255,255,255,.06); border:1px solid var(--line); color:var(--ink); border-radius:var(--r-sm); font-weight:600}
+    .btn-ghost:hover{background:rgba(255,255,255,.12); color:#fff}
+
+    .saving-overlay{
+      position:absolute; inset:0; z-index:10; display:none; place-items:center; align-content:center; gap:14px;
+      background:rgba(4,10,28,.72); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); text-align:center;
+    }
+    .is-saving .saving-overlay{display:grid}
+    .ring{
+      width:64px; height:64px; border-radius:50%;
+      border:4px solid rgba(25,195,255,.18); border-top-color:var(--neon);
+      box-shadow:0 0 24px rgba(25,195,255,.55); animation:spin .9s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ---------- Modal sukses ---------- */
+    .modal-content{background:rgba(8,18,48,.88); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); border:1px solid rgba(25,195,255,.4); border-radius:22px; box-shadow:0 0 50px rgba(25,195,255,.25)}
+    .check{width:84px; height:84px; margin:0 auto 12px}
+    .check circle{fill:none; stroke:var(--ok); stroke-width:3; stroke-dasharray:166; stroke-dashoffset:166; animation:draw .6s .1s ease forwards}
+    .check path{fill:none; stroke:var(--ok); stroke-width:4; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:48; stroke-dashoffset:48; animation:draw .4s .6s ease forwards}
+    @keyframes draw{to{stroke-dashoffset:0}}
+    .new-id{font-size:2rem; font-weight:800; color:var(--neon); text-shadow:0 0 18px rgba(25,195,255,.8)}
+
+    /* ---------- Pembayaran ---------- */
+    .stat .val.money{font-size:clamp(1.15rem,4.4vw,1.7rem)}
+    .picker{position:relative}
+    .picker-results{
+      position:absolute; left:0; right:0; top:calc(100% + 6px); z-index:25; display:none;
+      max-height:280px; overflow:auto; padding:6px;
+      background:rgba(6,14,38,.97); border:1px solid rgba(25,195,255,.45); border-radius:var(--r-sm);
+      box-shadow:0 18px 40px rgba(0,0,0,.55), 0 0 22px rgba(25,195,255,.18);
+    }
+    .picker-results.open{display:block}
+    .pick{
+      display:flex; justify-content:space-between; align-items:center; gap:10px; width:100%;
+      padding:10px 12px; border:0; border-radius:10px; background:transparent; color:var(--ink);
+      font:inherit; text-align:left; cursor:pointer;
+    }
+    .pick:hover,.pick.on{background:rgba(25,195,255,.12)}
+    .picked{
+      display:none; align-items:center; gap:14px; padding:12px 14px; border-radius:var(--r-sm);
+      border:1px solid rgba(25,195,255,.5); background:rgba(25,195,255,.07); box-shadow:0 0 18px rgba(25,195,255,.15);
+    }
+    .picked.show{display:flex}
+    .picked .avatar{
+      width:42px; height:42px; flex:none; border-radius:50%; display:grid; place-items:center;
+      font-weight:800; color:#021024; background:linear-gradient(135deg,var(--neon),var(--electric));
+    }
+    .picked .info{min-width:0; flex:1}
+    .picked .info strong{display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+    .method-grid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px}
+    .method{
+      display:flex; flex-direction:column; align-items:center; gap:4px; padding:12px 6px; height:100%;
+      border-radius:var(--r-sm); border:1px solid var(--line); background:rgba(4,12,34,.55);
+      color:var(--muted); font-weight:600; font-size:.86rem; text-align:center; cursor:pointer;
+      transition:color .2s,border-color .2s,background .2s,box-shadow .2s;
+    }
+    .method i{font-size:1.25rem}
+    .method:hover{color:var(--ink); border-color:rgba(25,195,255,.45)}
+    .btn-check:checked + .method{
+      color:#fff; border-color:var(--neon); box-shadow:0 0 18px rgba(25,195,255,.35);
+      background:linear-gradient(135deg,rgba(25,195,255,.22),rgba(47,107,255,.22));
+    }
+    .btn-check:checked + .method i{color:var(--neon)}
+    .btn-check:focus-visible + .method{outline:2px solid var(--neon); outline-offset:2px}
+    .input-group-text{background:rgba(25,195,255,.08); border:1px solid var(--line); color:var(--neon); font-weight:700; border-radius:var(--r-sm) 0 0 var(--r-sm)}
+    .input-group > .form-control{border-radius:0 var(--r-sm) var(--r-sm) 0}
+    .hint{font-size:.84rem; margin-top:6px}
+    .hint.bad{color:var(--bad)}
+    .hint.good{color:var(--ok)}
+
+    /* ---------- Bukti pembayaran ---------- */
+    .dropzone{
+      display:flex; align-items:center; gap:14px; padding:14px; margin:0; cursor:pointer;
+      border:1.5px dashed rgba(25,195,255,.45); border-radius:var(--r-sm); background:rgba(25,195,255,.04);
+      transition:border-color .2s,background .2s,box-shadow .2s;
+    }
+    .dropzone:hover,.dropzone.drag{border-color:var(--neon); background:rgba(25,195,255,.1); box-shadow:0 0 20px rgba(25,195,255,.2)}
+    .dropzone:focus-visible{outline:2px solid var(--neon); outline-offset:2px}
+    .dz-ico{
+      width:44px; height:44px; flex:none; border-radius:12px; display:grid; place-items:center; font-size:1.3rem;
+      color:var(--neon); background:rgba(25,195,255,.12); border:1px solid rgba(25,195,255,.35);
+    }
+    .bukti-prev{
+      display:none; align-items:center; gap:14px; padding:10px; border-radius:var(--r-sm);
+      border:1px solid rgba(25,195,255,.5); background:rgba(25,195,255,.07);
+    }
+    .bukti-prev.show{display:flex}
+    .bukti-prev img{width:64px; height:64px; object-fit:cover; border-radius:10px; border:1px solid var(--line); flex:none}
+    .bukti-prev .info{min-width:0; flex:1}
+    .bukti-img{display:block; max-width:100%; max-height:70vh; margin:0 auto; border-radius:12px; border:1px solid var(--line)}
+
+    /* ---------- Login ---------- */
+    .login-card{max-width:420px; margin:8px auto 0; padding:28px 24px}
+    .lock-ico{
+      width:56px; height:56px; margin:0 auto 14px; border-radius:16px; display:grid; place-items:center; font-size:1.6rem;
+      color:var(--neon); background:rgba(25,195,255,.12); border:1px solid rgba(25,195,255,.45); box-shadow:0 0 24px rgba(25,195,255,.35);
+    }
+    .login-card h2{font-size:1.2rem; font-weight:800; text-align:center; margin:0 0 4px}
+    .login-card .lead-sub{text-align:center; color:var(--muted); font-size:.9rem; margin-bottom:20px}
+    .pw-group > .form-control{border-radius:var(--r-sm) 0 0 var(--r-sm)}
+    .pw-group > .btn{border-radius:0 var(--r-sm) var(--r-sm) 0; border-left:0}
+    .stat .val.locked{display:flex; align-items:center; gap:8px; min-height:2.2rem; font-size:1.05rem; font-weight:600; color:var(--muted)}
+
+    /* ---------- Keuangan ---------- */
+    .method-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .stat .lbl.sm{font-size:.78rem}
+    .stat.saldo-hero{padding:20px 22px; border-color:rgba(25,195,255,.5); box-shadow:0 10px 40px rgba(0,0,0,.35), 0 0 34px rgba(25,195,255,.22), inset 0 1px 0 rgba(255,255,255,.06)}
+    .stat.saldo-hero .val.money{margin-top:2px; font-size:clamp(1.6rem,6.5vw,2.3rem); text-shadow:0 0 18px rgba(25,195,255,.45)}
+    .stat.saldo-hero .val.neg{text-shadow:none}
+    .amt-in{color:var(--ok)}
+    .amt-out{color:var(--bad)}
+    .stat .val.neg{color:var(--bad)}
+    input[type="date"].form-control{min-height:calc(1.5em + 1.4rem + 2px)}
+
+    /* ---------- Tagihan ---------- */
+    .seg{display:inline-flex; flex-wrap:wrap; gap:4px; padding:4px; border:1px solid var(--line); border-radius:var(--r-sm); background:rgba(4,12,34,.55)}
+    .seg-btn{border:0; background:transparent; color:var(--muted); font:inherit; font-weight:600; font-size:.9rem; padding:8px 16px; border-radius:9px; cursor:pointer; transition:color .2s,background .2s,box-shadow .2s}
+    .seg-btn:hover{color:var(--ink)}
+    .seg-btn:focus-visible{outline:2px solid var(--neon); outline-offset:2px}
+    .seg-btn.active{color:#fff; background:linear-gradient(135deg,rgba(25,195,255,.25),rgba(47,107,255,.25)); box-shadow:0 0 14px rgba(25,195,255,.25)}
+    .badge-s.lunas{color:var(--ok); border-color:rgba(46,230,166,.45); background:rgba(46,230,166,.1)}
+    .badge-s.belum{color:var(--bad); border-color:rgba(255,92,122,.45); background:rgba(255,92,122,.1)}
+    .badge-s.notarif{color:var(--warn); border-color:rgba(255,200,87,.45); background:rgba(255,200,87,.1)}
+    .act-group{display:inline-flex; flex-wrap:wrap; justify-content:flex-end; gap:4px}
+    .notice{display:flex; align-items:center; gap:12px; padding:12px 14px; margin-bottom:16px; border-radius:var(--r-sm); border:1px solid rgba(255,200,87,.5); background:rgba(255,200,87,.08)}
+    .notice > i{color:var(--warn); font-size:1.3rem; flex:none}
+
+    .badge-s.gratis{color:var(--neon); border-color:rgba(25,195,255,.5); background:rgba(25,195,255,.1)}
+    .badge-s.selesai{color:var(--muted); border-color:rgba(143,166,201,.4); background:rgba(143,166,201,.08)}
+    .hint.warn{color:var(--warn)}
+    .btn-ghost.armed{border-color:var(--bad); color:var(--bad)}
+    .pick:disabled{opacity:.55; cursor:not-allowed}
+
+    /* Invoice */
+    .inv-paper{background:#fff; color:#0b1b3a; border-radius:14px; overflow:hidden; font-size:.92rem; line-height:1.45; -webkit-print-color-adjust:exact; print-color-adjust:exact}
+    .inv-head{display:flex; justify-content:space-between; align-items:center; gap:16px; padding:20px 28px; background:linear-gradient(135deg,#06122e,#0a2a6b); color:#fff}
+    .inv-head img{height:44px; width:auto; max-width:140px; object-fit:contain}
+    .inv-brand{font-size:1.8rem; font-weight:800; color:#19c3ff}
+    .inv-title{text-align:right}
+    .inv-h{font-size:1.4rem; font-weight:800; letter-spacing:.08em}
+    .inv-body{padding:24px 28px}
+    .inv-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px}
+    .inv-k{font-size:.76rem; color:#5b6b8c; font-weight:600; margin-bottom:2px}
+    .inv-v{word-break:break-word}
+    .inv-r{text-align:right}
+    .inv-table{width:100%; border-collapse:collapse; margin:8px 0 16px}
+    .inv-table th,.inv-table td{padding:10px 8px; border-bottom:1px solid #e3e9f5; text-align:left; vertical-align:top}
+    .inv-table th{font-size:.78rem; color:#5b6b8c; font-weight:700}
+    .inv-table .r{text-align:right; white-space:nowrap}
+    .inv-table tfoot td{font-weight:800}
+    .inv-table tfoot tr:last-child td{border-bottom:0}
+    .inv-stamp{display:inline-block; padding:3px 14px; border:3px solid; border-radius:8px; font-weight:800; letter-spacing:.08em; transform:rotate(-5deg)}
+    .inv-stamp.ok{color:#15803d; border-color:#15803d}
+    .inv-stamp.bad{color:#b91c1c; border-color:#b91c1c}
+    .inv-note{padding:12px 14px; border-radius:10px; background:#eef4ff; white-space:pre-line; margin-bottom:12px}
+    .inv-foot{text-align:center; color:#5b6b8c; font-size:.85rem; margin-top:8px}
+    #printRoot{display:none}
+    @media print{
+      body{background:#fff!important}
+      body > *:not(#printRoot){display:none!important}
+      #printRoot{display:block!important}
+      #printRoot .inv-paper{border-radius:0}
+    }
+    @media (max-width: 575.98px){
+      .inv-head,.inv-body{padding:16px}
+      .inv-grid{grid-template-columns:1fr}
+      .inv-r{text-align:left}
+    }
+
+    /* ---------- Bottom nav (mobile) ---------- */
+    .bottom-nav{
+      display:none; position:fixed; left:12px; right:12px; bottom:12px; z-index:40;
+      padding:6px; gap:4px; justify-content:space-around;
+    }
+    .bottom-nav .nav-item{flex-direction:column; gap:3px; margin:0; padding:8px 6px; font-size:.74rem; text-align:center; justify-content:center}
+
+    @media (max-width: 991.98px){
+      .shell{grid-template-columns:minmax(0,1fr); padding:12px; padding-bottom:96px}
+      .sidebar{display:none}
+      .bottom-nav{display:flex}
+      .topbar{top:8px; padding:8px 12px}
+      .brand img{height:38px}
+      .brand-text span{display:none}
+      #chipDate{display:none}
+      .form-card{padding:18px}
+    }
+    @media (max-width: 575.98px){
+      .brand-text{display:none}
+      .stat .val{font-size:1.65rem}
+      .method{padding:10px 2px; font-size:.78rem}
+    }
+    @media (prefers-reduced-motion: reduce){
+      *{animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important}
+    }
+    @media (max-width: 575.98px){
+      .bottom-nav{left:8px; right:8px; gap:2px}
+      .bottom-nav .nav-item{padding:8px 2px; font-size:.68rem}
+    }
+  </style>
+</head>
+<body>
+<div class="bg-orbs"></div>
+
+<div class="shell">
+  <!-- Header -->
+  <header class="topbar glass">
+    <div class="brand">
+      <img id="logo" alt="3NET"
+           src="https://drive.google.com/uc?export=view&id=1P_fqd-N45AIP7djESNM7tvRIOuy2tq8b"
+           referrerpolicy="no-referrer">
+      <span class="brand-fallback" id="logoFallback">3NET</span>
+      <div class="brand-text">
+        <strong>Customer Hub</strong>
+        <span>Manajemen pelanggan WiFi</span>
+      </div>
+    </div>
+    <div class="top-right">
+      <span class="chip" id="chipDate"><i class="bi bi-calendar3"></i><span id="todayLong"></span></span>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar glass" aria-label="Menu utama">
+    <button class="nav-item active" data-view="dashboard"><i class="bi bi-grid-1x2-fill"></i>Dashboard</button>
+    <button class="nav-item" data-view="input"><i class="bi bi-person-plus-fill"></i>Input pelanggan</button>
+    <button class="nav-item" data-view="data"><i class="bi bi-table"></i>Data pelanggan</button>
+    <button class="nav-item" data-view="bayar" data-tab="input" data-icon="bi-cash-coin"><i class="bi bi-lock-fill"></i>Input pembayaran</button>
+    <button class="nav-item" data-view="bayar" data-tab="tagihan" data-icon="bi-receipt"><i class="bi bi-lock-fill"></i>Tagihan pelanggan</button>
+    <button class="nav-item" data-view="bayar" data-tab="gratis" data-icon="bi-gift"><i class="bi bi-lock-fill"></i>Bebas tagihan</button>
+    <button class="nav-item" data-view="keuangan"><i class="bi bi-lock-fill"></i>Input laporan keuangan</button>
+  </aside>
+
+  <main class="content">
+    <!-- Dashboard -->
+    <section id="view-dashboard" data-title="Dashboard">
+      <div class="page-head"><h1>Dashboard</h1><p>Ringkasan pelanggan 3NET hari ini.</p></div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-6 col-lg-4"><div class="stat glass"><div class="ico"><i class="bi bi-people-fill"></i></div><div class="val shimmer" id="stTotal">000</div><div class="lbl">Total pelanggan</div></div></div>
+        <div class="col-6 col-lg-4"><div class="stat glass"><div class="ico"><i class="bi bi-wifi"></i></div><div class="val shimmer" id="stAktif">000</div><div class="lbl">Pelanggan aktif</div></div></div>
+        <div class="col-6 col-lg-4"><div class="stat glass"><div class="ico"><i class="bi bi-calendar-check-fill"></i></div><div class="val shimmer" id="stBulan">000</div><div class="lbl">Aktivasi bulan ini</div></div></div>
+        <div class="col-6 col-lg-4"><div class="stat glass"><div class="ico"><i class="bi bi-lightning-charge-fill"></i></div><div class="val shimmer" id="stHari">000</div><div class="lbl">Aktivasi hari ini</div></div></div>
+        <div class="col-6 col-lg-4"><div class="stat glass"><div class="ico"><i class="bi bi-cash-stack"></i></div><div class="val money shimmer" id="stMasuk">Rp 000.000</div><div class="lbl">Pemasukan bulan ini</div></div></div>
+        <div class="col-6 col-lg-4"><div class="stat glass"><div class="ico"><i class="bi bi-hourglass-split"></i></div><div class="val shimmer" id="stBelum">000</div><div class="lbl">Belum bayar bulan ini</div></div></div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-4">
+          <div class="panel glass h-100">
+            <h2>Pelanggan per paket</h2>
+            <div id="paketBars"><div class="empty">Memuat…</div></div>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="panel glass h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="m-0">Pelanggan terbaru</h2>
+              <button class="btn btn-ghost btn-sm px-3" data-go="data">Lihat semua</button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>ID</th><th>Pelanggan</th><th class="d-none d-md-table-cell">Paket</th><th>Status</th></tr></thead>
+                <tbody id="recentBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Input -->
+    <section id="view-input" class="d-none" data-title="Input pelanggan">
+      <div class="page-head"><h1>Input pelanggan baru</h1><p>Data langsung tersimpan ke Google Sheet.</p></div>
+
+      <div class="form-card glass" id="formCard">
+        <div class="saving-overlay" aria-live="polite">
+          <div class="ring"></div>
+          <div><strong>Menyimpan data…</strong><div class="text-secondary small">Mohon tunggu sebentar</div></div>
+        </div>
+
+        <form id="custForm" novalidate>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="nama">Nama lengkap</label>
+              <input class="form-control" id="nama" name="nama" maxlength="80" placeholder="Contoh: Budi Santoso" autocomplete="off" required>
+              <div class="invalid-feedback">Nama minimal 3 karakter.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="hp">No HP / WhatsApp</label>
+              <input class="form-control" id="hp" name="hp" type="tel" inputmode="tel" maxlength="16" placeholder="08xxxxxxxxxx" autocomplete="off" required>
+              <div class="invalid-feedback">Nomor tidak valid. Gunakan 08xxxxxxxxxx atau +62 8xx.</div>
+              <div class="valid-feedback" id="hpOk">Nomor valid.</div>
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="alamat">Alamat pemasangan</label>
+              <textarea class="form-control" id="alamat" name="alamat" rows="2" maxlength="250" placeholder="Jalan, RT/RW, kelurahan" required></textarea>
+              <div class="invalid-feedback">Alamat minimal 5 karakter.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="paket">Paket internet</label>
+              <select class="form-select" id="paket" name="paket" required>
+                <option value="" selected disabled>Pilih paket</option>
+              </select>
+              <div class="invalid-feedback">Pilih paket internet.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="status">Status</label>
+              <select class="form-select" id="status" name="status"></select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="tgl">Tanggal aktivasi</label>
+              <input class="form-control" id="tgl" readonly>
+              <div class="form-text">Terisi otomatis dengan tanggal hari ini.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="idprev">ID pelanggan</label>
+              <input class="form-control id-field" id="idprev" readonly value="3NET-0001">
+              <div class="form-text">Dibuat otomatis saat data disimpan.</div>
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="catatan">Catatan <span class="text-secondary fw-normal">(opsional)</span></label>
+              <input class="form-control" id="catatan" name="catatan" maxlength="250" placeholder="Misal: patokan rumah, jenis perangkat">
+            </div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 justify-content-end mt-4">
+            <button type="reset" class="btn btn-ghost px-4" id="btnReset">Kosongkan</button>
+            <button type="submit" class="btn btn-neon" id="btnSave">
+              <span class="spinner-border spinner-border-sm me-2 d-none" id="btnSpin" aria-hidden="true"></span>
+              <i class="bi bi-cloud-arrow-up-fill me-2" id="btnIcon"></i><span id="btnText">Simpan pelanggan</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Data -->
+    <section id="view-data" class="d-none" data-title="Data pelanggan">
+      <div class="page-head"><h1>Data pelanggan</h1><p>Menampilkan hingga 300 pelanggan terbaru.</p></div>
+      <div class="panel glass">
+        <div class="row g-2 mb-3">
+          <div class="col-md-6 col-lg-4">
+            <input class="form-control" id="search" type="search" placeholder="Cari nama, ID, atau nomor HP" autocomplete="off">
+          </div>
+          <div class="col-md-auto ms-md-auto">
+            <button class="btn btn-ghost w-100" id="btnRefresh"><i class="bi bi-arrow-clockwise me-2"></i>Muat ulang</button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead><tr><th>ID</th><th>Pelanggan</th><th class="d-none d-lg-table-cell">Alamat</th><th class="d-none d-md-table-cell">Paket</th><th class="d-none d-md-table-cell">Aktivasi</th><th>Status</th></tr></thead>
+            <tbody id="dataBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pembayaran -->
+    <section id="view-bayar" class="d-none" data-title="Input pembayaran">
+      <div class="page-head"><h1>Input pembayaran</h1><p>Catat iuran WiFi pelanggan per periode tagihan.</p></div>
+
+      <div id="bayarLock"></div>
+
+      <div id="bayarContent" class="d-none">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span class="chip"><i class="bi bi-shield-check"></i>Sesi petugas aktif</span>
+          <button type="button" class="btn btn-ghost btn-sm px-3" id="btnLogout"><i class="bi bi-box-arrow-right me-2"></i>Keluar</button>
+        </div>
+
+        <div class="seg mb-3" role="tablist" aria-label="Menu billing">
+          <button type="button" class="seg-btn active" role="tab" data-ptab="input" aria-selected="true">Input pembayaran</button>
+          <button type="button" class="seg-btn" role="tab" data-ptab="tagihan" aria-selected="false">Tagihan pelanggan</button>
+          <button type="button" class="seg-btn" role="tab" data-ptab="gratis" aria-selected="false">Bebas tagihan</button>
+        </div>
+
+      <div id="payTabInput">
+      <div class="form-card glass mb-3" id="payCard">
+        <div class="saving-overlay" aria-live="polite">
+          <div class="ring"></div>
+          <div><strong id="payOverlayText">Menyimpan pembayaran…</strong><div class="text-secondary small">Mohon tunggu sebentar</div></div>
+        </div>
+
+        <form id="payForm" novalidate>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label" for="custSearch">Pelanggan</label>
+              <div class="picker" id="picker">
+                <input class="form-control" id="custSearch" type="search" placeholder="Cari nama, ID, atau nomor HP" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="custResults">
+                <div class="picker-results" id="custResults" role="listbox"></div>
+                <div class="invalid-feedback">Pilih pelanggan terlebih dahulu.</div>
+              </div>
+              <div class="picked" id="custPicked">
+                <div class="avatar" id="pkAvatar"></div>
+                <div class="info"><strong id="pkNama"></strong><span class="sub" id="pkSub"></span></div>
+                <button type="button" class="btn btn-ghost btn-sm px-3" id="pkChange">Ganti</button>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="pBulan">Periode tagihan</label>
+              <div class="row g-2">
+                <div class="col-7"><select class="form-select" id="pBulan"></select></div>
+                <div class="col-5"><select class="form-select" id="pTahun" aria-label="Tahun"></select></div>
+              </div>
+              <div class="hint" id="periodeHint" aria-live="polite"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="pJumlah">Jumlah bayar</label>
+              <div class="input-group has-validation">
+                <span class="input-group-text">Rp</span>
+                <input class="form-control" id="pJumlah" inputmode="numeric" placeholder="0" autocomplete="off">
+                <div class="invalid-feedback">Masukkan jumlah yang valid (maksimal Rp 100.000.000).</div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="form-label" id="metodeLabel">Metode pembayaran</div>
+              <div class="method-grid" id="metodeGrid" role="radiogroup" aria-labelledby="metodeLabel">
+                <div><input type="radio" class="btn-check" name="metode" id="mTunai" value="Tunai" autocomplete="off"><label class="method" for="mTunai"><i class="bi bi-cash-coin"></i>Tunai</label></div>
+                <div><input type="radio" class="btn-check" name="metode" id="mTransfer" value="Transfer" autocomplete="off"><label class="method" for="mTransfer"><i class="bi bi-bank"></i>Transfer</label></div>
+                <div><input type="radio" class="btn-check" name="metode" id="mQris" value="QRIS" autocomplete="off"><label class="method" for="mQris"><i class="bi bi-qr-code"></i>QRIS</label></div>
+                <div><input type="radio" class="btn-check" name="metode" id="mEwallet" value="E-wallet" autocomplete="off"><label class="method" for="mEwallet"><i class="bi bi-wallet2"></i>E-wallet</label></div>
+              </div>
+              <div class="hint bad d-none" id="metodeErr">Pilih metode pembayaran.</div>
+            </div>
+
+            <div class="col-12">
+              <div class="form-label" id="buktiLabel">Bukti pembayaran <span class="text-secondary fw-normal">(opsional)</span></div>
+              <label class="dropzone" id="dropzone" for="pBukti" tabindex="0" aria-describedby="buktiHelp">
+                <span class="dz-ico"><i class="bi bi-cloud-arrow-up"></i></span>
+                <span><strong>Pilih foto bukti</strong><span class="sub" id="buktiHelp">Foto struk atau tangkapan layar transfer. Dikecilkan otomatis sebelum diunggah.</span></span>
+              </label>
+              <input type="file" id="pBukti" class="d-none" accept="image/*">
+              <div class="bukti-prev" id="buktiPrev">
+                <img id="buktiThumb" alt="Pratinjau bukti pembayaran">
+                <div class="info"><strong class="d-block text-truncate" id="buktiName"></strong><span class="sub" id="buktiSize"></span></div>
+                <button type="button" class="btn btn-ghost btn-sm px-3" id="buktiRemove">Hapus</button>
+              </div>
+              <div class="hint bad d-none" id="buktiErr" aria-live="polite"></div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="payTgl">Tanggal bayar</label>
+              <input class="form-control" id="payTgl" readonly>
+              <div class="form-text">Terisi otomatis dengan tanggal hari ini.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="payId">ID pembayaran</label>
+              <input class="form-control id-field" id="payId" readonly value="PAY-0001">
+              <div class="form-text">Dibuat otomatis saat data disimpan.</div>
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="pCatatan">Catatan <span class="text-secondary fw-normal">(opsional)</span></label>
+              <input class="form-control" id="pCatatan" maxlength="250" placeholder="Misal: dibayar lewat tetangga, nomor referensi transfer">
+            </div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 justify-content-end mt-4">
+            <button type="reset" class="btn btn-ghost px-4" id="btnPayReset">Kosongkan</button>
+            <button type="submit" class="btn btn-neon" id="btnPaySave">
+              <span class="spinner-border spinner-border-sm me-2 d-none" id="paySpin" aria-hidden="true"></span>
+              <i class="bi bi-cloud-arrow-up-fill me-2" id="payIcon"></i><span id="payText">Simpan pembayaran</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel glass">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <h2 class="m-0">Riwayat pembayaran</h2>
+          <span class="chip"><i class="bi bi-wallet2"></i>Total ditampilkan <strong id="payTotal">Rp 0</strong></span>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-md-6 col-lg-4">
+            <input class="form-control" id="paySearch" type="search" placeholder="Cari nama, ID, atau periode" autocomplete="off">
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead><tr><th>ID</th><th>Pelanggan</th><th>Periode</th><th class="text-end">Jumlah</th><th class="d-none d-md-table-cell">Metode</th><th class="d-none d-md-table-cell">Tanggal</th><th class="text-center">Bukti</th></tr></thead>
+            <tbody id="payBody"></tbody>
+          </table>
+        </div>
+      </div>
+      </div>
+
+      <div id="payTabTagihan" class="d-none">
+        <div id="tgNotice" class="notice d-none">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <div class="flex-grow-1"><strong id="tgNoticeTitle">Tarif paket belum diatur.</strong><span class="d-block small text-secondary">Atur tarif per paket agar tagihan terhitung otomatis.</span></div>
+          <button type="button" class="btn btn-neon btn-sm px-3" data-tarif>Atur tarif</button>
+        </div>
+
+        <div class="panel glass mb-3">
+          <div class="row g-3 align-items-end">
+            <div class="col-7 col-md-3"><label class="form-label" for="tgBulan">Bulan tagihan</label><select class="form-select" id="tgBulan"></select></div>
+            <div class="col-5 col-md-2"><label class="form-label" for="tgTahun">Tahun</label><select class="form-select" id="tgTahun"></select></div>
+            <div class="col-12 col-md-auto ms-md-auto d-flex gap-2">
+              <button type="button" class="btn btn-ghost" data-tarif><i class="bi bi-sliders me-2"></i>Atur tarif</button>
+              <button type="button" class="btn btn-ghost" id="btnTgRefresh"><i class="bi bi-arrow-clockwise me-2"></i>Muat ulang</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-6 col-lg-3"><div class="stat glass"><div class="ico"><i class="bi bi-receipt"></i></div><div class="val money shimmer" id="tgTotal">Rp 000.000</div><div class="lbl">Total tagihan</div></div></div>
+          <div class="col-6 col-lg-3"><div class="stat glass"><div class="ico"><i class="bi bi-check-circle-fill"></i></div><div class="val money shimmer" id="tgTerbayar">Rp 000.000</div><div class="lbl">Sudah dibayar</div></div></div>
+          <div class="col-6 col-lg-3"><div class="stat glass"><div class="ico"><i class="bi bi-hourglass-split"></i></div><div class="val money shimmer" id="tgBelum">Rp 000.000</div><div class="lbl" id="tgBelumLbl">Belum dibayar</div></div></div>
+          <div class="col-6 col-lg-3"><div class="stat glass"><div class="ico"><i class="bi bi-people-fill"></i></div><div class="val shimmer" id="tgLunas">0 / 0</div><div class="lbl">Pelanggan lunas</div></div></div>
+        </div>
+
+        <div class="panel glass">
+          <div class="d-flex justify-content-between small text-secondary mb-1"><span>Tertagih</span><span id="tgPct">0%</span></div>
+          <div class="bar-track mb-3"><div class="bar-fill" id="tgBar" style="width:0%"></div></div>
+
+          <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+            <div class="seg" id="tgFilter" role="group" aria-label="Filter status">
+              <button type="button" class="seg-btn active" data-f="semua">Semua</button>
+              <button type="button" class="seg-btn" data-f="belum">Belum bayar</button>
+              <button type="button" class="seg-btn" data-f="lunas">Lunas</button>
+              <button type="button" class="seg-btn" data-f="gratis">Bebas tagihan</button>
+            </div>
+            <input class="form-control" style="max-width:320px" id="tgSearch" type="search" placeholder="Cari nama, ID, atau nomor HP" autocomplete="off">
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead><tr><th>Pelanggan</th><th class="d-none d-md-table-cell">Paket</th><th class="text-end">Tagihan</th><th class="d-none d-md-table-cell">Status</th><th class="text-end">Aksi</th></tr></thead>
+              <tbody id="tgBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="payTabGratis" class="d-none">
+        <div class="row g-3 mb-3">
+          <div class="col-6 col-lg-4"><div class="stat glass"><div class="ico"><i class="bi bi-gift-fill"></i></div><div class="val shimmer" id="grAktif">0</div><div class="lbl">Pelanggan bebas tagihan</div></div></div>
+          <div class="col-6 col-lg-4"><div class="stat glass"><div class="ico"><i class="bi bi-cash-stack"></i></div><div class="val money shimmer" id="grNilai">Rp 000.000</div><div class="lbl">Tagihan dibebaskan per bulan</div><div class="lbl sm" id="grNilaiNote"></div></div></div>
+          <div class="col-12 col-lg-4"><div class="stat glass"><div class="ico"><i class="bi bi-pie-chart-fill"></i></div><div class="val shimmer" id="grPersen">0%</div><div class="lbl">Dari pelanggan aktif</div></div></div>
+        </div>
+
+        <div class="panel glass">
+          <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+            <h2 class="m-0">Daftar pelanggan bebas tagihan</h2>
+            <button type="button" class="btn btn-neon" id="btnGrAdd"><i class="bi bi-plus-lg me-2"></i>Tambah</button>
+          </div>
+          <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+            <div class="seg" id="grFilter" role="group" aria-label="Filter masa bebas tagihan">
+              <button type="button" class="seg-btn active" data-f="aktif">Berlaku</button>
+              <button type="button" class="seg-btn" data-f="semua">Semua</button>
+            </div>
+            <input class="form-control" style="max-width:320px" id="grSearch" type="search" placeholder="Cari nama, ID, atau alasan" autocomplete="off">
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead><tr><th>Pelanggan</th><th class="d-none d-md-table-cell">Paket</th><th class="d-none d-md-table-cell">Alasan</th><th>Masa berlaku</th><th class="text-end">Aksi</th></tr></thead>
+              <tbody id="grBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <!-- Keuangan -->
+    <section id="view-keuangan" class="d-none" data-title="Laporan keuangan">
+      <div class="page-head"><h1>Input laporan keuangan</h1><p>Catat pemasukan dan pengeluaran operasional 3NET.</p></div>
+
+      <div id="keuLock"></div>
+
+      <div id="keuContent" class="d-none">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span class="chip"><i class="bi bi-shield-check"></i>Sesi keuangan aktif</span>
+          <button type="button" class="btn btn-ghost btn-sm px-3" id="btnLogoutKeu"><i class="bi bi-box-arrow-right me-2"></i>Keluar</button>
+        </div>
+
+        <div class="stat saldo-hero glass mb-3">
+          <div class="d-flex align-items-center gap-3">
+            <div class="ico"><i class="bi bi-safe2-fill"></i></div>
+            <div class="flex-grow-1" style="min-width:0">
+              <div class="lbl">Saldo akhir (semua transaksi)</div>
+              <div class="val money shimmer" id="kSaldoAkhir">Rp 000.000</div>
+              <div class="lbl sm" id="kSaldoAkhirDetail">Iuran pelanggan + pemasukan lain - pengeluaran, sejak transaksi pertama</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-sm-6 col-md-4 col-lg-3">
+            <label class="form-label" for="keuBulan">Periode laporan</label>
+            <select class="form-select" id="keuBulan"></select>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-lg-4"><div class="stat glass"><div class="ico"><i class="bi bi-arrow-down-circle-fill"></i></div><div class="val money shimmer" id="kMasuk">Rp 000.000</div><div class="lbl" id="kMasukLbl">Pemasukan bulan ini</div><div class="lbl sm" id="kMasukDetail">Termasuk iuran pelanggan</div></div></div>
+          <div class="col-6 col-lg-4"><div class="stat glass"><div class="ico"><i class="bi bi-arrow-up-circle-fill"></i></div><div class="val money shimmer" id="kKeluar">Rp 000.000</div><div class="lbl" id="kKeluarLbl">Pengeluaran bulan ini</div></div></div>
+          <div class="col-6 col-lg-4"><div class="stat glass"><div class="ico"><i class="bi bi-wallet2"></i></div><div class="val money shimmer" id="kSaldo">Rp 000.000</div><div class="lbl" id="kSaldoLbl">Saldo bulan ini</div></div></div>
+        </div>
+
+        <div class="form-card glass mb-3" id="keuCard">
+          <div class="saving-overlay" aria-live="polite">
+            <div class="ring"></div>
+            <div><strong id="keuOverlayText">Menyimpan transaksi…</strong><div class="text-secondary small">Mohon tunggu sebentar</div></div>
+          </div>
+
+          <form id="keuForm" novalidate>
+            <div class="row g-3">
+              <div class="col-12">
+                <div class="form-label" id="kJenisLabel">Jenis transaksi</div>
+                <div class="method-grid two" role="radiogroup" aria-labelledby="kJenisLabel">
+                  <div><input type="radio" class="btn-check" name="kjenis" id="kJenisMasuk" value="Pemasukan" autocomplete="off"><label class="method" for="kJenisMasuk"><i class="bi bi-arrow-down-circle"></i>Pemasukan</label></div>
+                  <div><input type="radio" class="btn-check" name="kjenis" id="kKeluarJenis" value="Pengeluaran" autocomplete="off" checked><label class="method" for="kKeluarJenis"><i class="bi bi-arrow-up-circle"></i>Pengeluaran</label></div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="kKategori">Kategori</label>
+                <select class="form-select" id="kKategori" required></select>
+                <div class="invalid-feedback">Pilih kategori.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="kTgl">Tanggal transaksi</label>
+                <input class="form-control" id="kTgl" type="date" required>
+                <div class="invalid-feedback">Isi tanggal yang valid (tidak boleh di masa depan).</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="kJumlah">Jumlah</label>
+                <div class="input-group has-validation">
+                  <span class="input-group-text">Rp</span>
+                  <input class="form-control" id="kJumlah" inputmode="numeric" placeholder="0" autocomplete="off">
+                  <div class="invalid-feedback">Masukkan jumlah yang valid (maksimal Rp 1.000.000.000).</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="kId">ID transaksi</label>
+                <input class="form-control id-field" id="kId" readonly value="KEU-0001">
+                <div class="form-text">Dibuat otomatis saat data disimpan.</div>
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="kKet">Keterangan</label>
+                <input class="form-control" id="kKet" maxlength="150" placeholder="Contoh: Bayar bandwidth bulan Oktober" autocomplete="off" required>
+                <div class="invalid-feedback">Keterangan minimal 3 karakter.</div>
+              </div>
+              <div class="col-12">
+                <div class="form-label" id="kBuktiLabel">Bukti pembelian <span class="text-secondary fw-normal">(opsional)</span></div>
+                <label class="dropzone" id="kDropzone" for="kBukti" tabindex="0">
+                  <span class="dz-ico"><i class="bi bi-receipt-cutoff"></i></span>
+                  <span><strong>Pilih foto nota atau struk</strong><span class="sub">Dikecilkan otomatis sebelum diunggah.</span></span>
+                </label>
+                <input type="file" id="kBukti" class="d-none" accept="image/*">
+                <div class="bukti-prev" id="kBuktiPrev">
+                  <img id="kBuktiThumb" alt="Pratinjau bukti pembelian">
+                  <div class="info"><strong class="d-block text-truncate" id="kBuktiName"></strong><span class="sub" id="kBuktiSize"></span></div>
+                  <button type="button" class="btn btn-ghost btn-sm px-3" id="kBuktiRemove">Hapus</button>
+                </div>
+                <div class="hint bad d-none" id="kBuktiErr" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 justify-content-end mt-4">
+              <button type="reset" class="btn btn-ghost px-4" id="btnKeuReset">Kosongkan</button>
+              <button type="submit" class="btn btn-neon" id="btnKeuSave">
+                <span class="spinner-border spinner-border-sm me-2 d-none" id="keuSpin" aria-hidden="true"></span>
+                <i class="bi bi-cloud-arrow-up-fill me-2" id="keuIcon"></i><span id="keuText">Simpan transaksi</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel glass">
+          <h2 id="keuTitle">Transaksi bulan ini</h2>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead><tr><th class="d-none d-md-table-cell">ID</th><th class="d-none d-md-table-cell">Tanggal</th><th>Keterangan</th><th class="text-end">Pemasukan</th><th class="text-end">Pengeluaran</th><th class="text-center">Bukti</th></tr></thead>
+              <tbody id="keuBody"></tbody>
+              <tfoot><tr class="fw-bold"><td class="d-none d-md-table-cell" colspan="2"></td><td>Total</td><td class="text-end text-nowrap amt-in" id="keuTotMasuk">Rp 0</td><td class="text-end text-nowrap amt-out" id="keuTotKeluar">Rp 0</td><td></td></tr></tfoot>
+            </table>
+          </div>
+          <p class="text-secondary small mt-3 mb-0" id="keuNote"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Bottom nav (mobile) -->
+<nav class="bottom-nav glass" aria-label="Menu utama">
+  <button class="nav-item active" data-view="dashboard"><i class="bi bi-grid-1x2-fill"></i>Dashboard</button>
+  <button class="nav-item" data-view="input"><i class="bi bi-person-plus-fill"></i>Input</button>
+  <button class="nav-item" data-view="data"><i class="bi bi-table"></i>Data</button>
+  <button class="nav-item" data-view="bayar"><i class="bi bi-lock-fill"></i>Bayar</button>
+  <button class="nav-item" data-view="keuangan"><i class="bi bi-lock-fill"></i>Keuangan</button>
+</nav>
+
+<!-- Modal sukses -->
+<div class="modal fade" id="okModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content text-center p-4">
+      <svg class="check" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="25"/><path d="M14 27l8 8 16-17"/></svg>
+      <h5 class="fw-bold mb-1" id="okTitle">Pelanggan tersimpan</h5>
+      <div class="text-secondary small" id="okName"></div>
+      <div class="new-id my-2" id="okId"></div>
+      <div class="d-grid gap-2 mt-2">
+        <button class="btn btn-neon" id="okAgain" data-bs-dismiss="modal">Tambah pelanggan lagi</button>
+        <button class="btn btn-ghost" id="okToData" data-bs-dismiss="modal">Lihat data pelanggan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal lihat bukti -->
+<div class="modal fade" id="buktiModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content p-3">
+      <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+        <div style="min-width:0"><h5 class="fw-bold mb-0" id="bkTitle">Bukti pembayaran</h5><div class="text-secondary small" id="bkMeta"></div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div id="bkBody" class="text-center"></div>
+      <div class="mt-3 text-end d-none" id="bkLinkWrap">
+        <a class="btn btn-ghost btn-sm" id="bkLink" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-2"></i>Buka di Drive</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal tambah bebas tagihan -->
+<div class="modal fade" id="gratisModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3">
+      <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+        <div><h5 class="fw-bold mb-0">Tambah bebas tagihan</h5><div class="text-secondary small">Pelanggan tidak ditagih selama masa berlaku.</div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <form id="gratisForm" novalidate>
+        <div class="my-3">
+          <label class="form-label" for="grCari">Pelanggan</label>
+          <div class="picker" id="grPicker">
+            <input class="form-control" id="grCari" type="search" placeholder="Cari nama, ID, atau nomor HP" autocomplete="off">
+            <div class="picker-results" id="grResults" role="listbox"></div>
+          </div>
+          <div class="picked" id="grPicked">
+            <div class="avatar" id="grAvatar"></div>
+            <div class="info"><strong id="grPkNama"></strong><span class="sub" id="grPkSub"></span></div>
+            <button type="button" class="btn btn-ghost btn-sm px-3" id="grChange">Ganti</button>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="form-label">Mulai periode</div>
+          <div class="row g-2"><div class="col-7"><select class="form-select" id="grMulaiBulan" aria-label="Bulan mulai"></select></div><div class="col-5"><select class="form-select" id="grMulaiTahun" aria-label="Tahun mulai"></select></div></div>
+        </div>
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" id="grBatas">
+          <label class="form-check-label" for="grBatas">Batasi sampai bulan tertentu</label>
+        </div>
+        <div class="mb-3 d-none" id="grSampaiWrap">
+          <div class="form-label">Sampai periode</div>
+          <div class="row g-2"><div class="col-7"><select class="form-select" id="grSampaiBulan" aria-label="Bulan akhir"></select></div><div class="col-5"><select class="form-select" id="grSampaiTahun" aria-label="Tahun akhir"></select></div></div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="grAlasan">Alasan</label>
+          <input class="form-control" id="grAlasan" maxlength="100" placeholder="Contoh: Pengurus RT, karyawan, promo" autocomplete="off">
+        </div>
+        <div class="hint bad d-none" id="grErr" role="alert"></div>
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <button type="button" class="btn btn-ghost px-4" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-neon" id="btnGrSave"><span class="spinner-border spinner-border-sm me-2 d-none" id="grSpin" aria-hidden="true"></span><span id="grText">Simpan</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal tarif -->
+<div class="modal fade" id="tarifModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content p-3">
+      <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+        <div><h5 class="fw-bold mb-0">Tarif paket</h5><div class="text-secondary small">Tarif per bulan. Kosongkan jika belum diatur.</div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <form id="tarifForm" novalidate>
+        <div id="tarifRows" class="vstack gap-3 my-3"></div>
+        <div class="hint bad d-none" id="tarifErr" role="alert"></div>
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <button type="button" class="btn btn-ghost px-4" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-neon" id="btnTarifSave"><span class="spinner-border spinner-border-sm me-2 d-none" id="tarifSpin" aria-hidden="true"></span><span id="tarifText">Simpan tarif</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal invoice -->
+<div class="modal fade" id="invModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content p-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Invoice tagihan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div id="invPaper" class="inv-paper"></div>
+      <div class="d-flex flex-wrap gap-2 justify-content-end mt-3">
+        <a class="btn btn-ghost" id="invWa" target="_blank" rel="noopener"><i class="bi bi-whatsapp me-2"></i>Kirim WhatsApp</a>
+        <button type="button" class="btn btn-neon" id="invPrint"><i class="bi bi-printer-fill me-2"></i>Cetak / Simpan PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast error -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:2000">
+  <div id="errToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive">
+    <div class="d-flex"><div class="toast-body" id="errMsg"></div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Tutup"></button></div>
+  </div>
+</div>
+
+<div id="printRoot" aria-hidden="true"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Ubah daftar paket & status di sini sesuai layanan 3NET
+  const PAKET_LIST = ['10 Mbps', '20 Mbps', '30 Mbps', '50 Mbps', '100 Mbps'];
+  const STATUS_LIST = ['Aktif', 'Isolir', 'Nonaktif'];
+  // Opsional: harga per paket agar jumlah bayar terisi otomatis, contoh: {'10 Mbps': 150000, '20 Mbps': 200000}
+  const HARGA_PAKET = {};
+  // Info pembayaran: tampil di invoice (yang belum lunas) dan di pesan pengingat WhatsApp.
+  // Satu baris per elemen. Kosongkan daftar ([]) untuk menyembunyikannya.
+  const INFO_PEMBAYARAN = [
+    'Bank BCA 3431598408',
+    'Bank Mandiri 1560014695060',
+    'A.N. Deni Rohendi',
+    'Dana 08211598803',
+    'A.N. yp964943'
+  ].join('\n');
+  const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const state = { rows: [], nextId: '3NET-0001', customers: [], payments: [], paid: new Set(), nextPayId: 'PAY-0001', picked: null, okTarget: 'data', view: 'dashboard', payTab: 'input', tarif: {}, tagihan: { rows: [], periode: '', filter: 'semua', seq: 0, pakets: [] }, gratis: [], gr: { rows: [], filter: 'aktif', seq: 0, picked: null, items: [] }, tokens: { bayar: null, keuangan: null }, auth: { bayar: false, keuangan: false }, keu: { today: '', nextId: 'KEU-0001' } };
+
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  /* ---------- Logo: fallback bila Drive menolak hotlink ---------- */
+  (function () {
+    const img = $('#logo'); let tried = 0;
+    img.addEventListener('error', function () {
+      if (tried++ === 0) img.src = 'https://drive.google.com/thumbnail?id=1P_fqd-N45AIP7djESNM7tvRIOuy2tq8b&sz=w400';
+      else { img.style.display = 'none'; $('#logoFallback').style.display = 'block'; }
+    });
+  })();
+
+  /* ---------- Tanggal otomatis ---------- */
+  function todayLong() {
+    return new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  function setToday() { $('#tgl').value = todayLong(); $('#payTgl').value = todayLong(); $('#todayLong').textContent = todayLong(); }
+
+  /* ---------- Navigasi ---------- */
+  function updateNavActive() {
+    $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === state.view && (!b.dataset.tab || b.dataset.tab === state.payTab)));
+  }
+  function applyPayTab() {
+    $('#payTabInput').classList.toggle('d-none', state.payTab !== 'input');
+    $('#payTabTagihan').classList.toggle('d-none', state.payTab !== 'tagihan');
+    $('#payTabGratis').classList.toggle('d-none', state.payTab !== 'gratis');
+    $$('[data-ptab]').forEach(b => { const on = b.dataset.ptab === state.payTab; b.classList.toggle('active', on); b.setAttribute('aria-selected', String(on)); });
+    updateNavActive();
+  }
+  function setPayTab(tab) {
+    state.payTab = tab;
+    applyPayTab();
+    loadPayTab();
+  }
+  function showView(name, tab) {
+    if (name === 'bayar' && tab) state.payTab = tab;
+    state.view = name;
+    ['dashboard', 'input', 'data', 'bayar', 'keuangan'].forEach(v => $('#view-' + v).classList.toggle('d-none', v !== name));
+    applyPayTab();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (AUTH[name] && !state.auth[name]) setTimeout(() => {
+      const ae = document.activeElement;
+      if (ae && ae.closest && ae.closest('.login-card')) return;   // pengguna sudah mengetik, jangan rebut fokus
+      const u = $('#' + AUTH[name].p + 'User'); if (u) u.focus();
+    }, 60);
+    if (name === 'keuangan' && state.auth.keuangan) loadKeu();
+    if (name === 'bayar') loadPayTab();
+  }
+  $$('.nav-item').forEach(b => b.addEventListener('click', () => showView(b.dataset.view, b.dataset.tab)));
+  $$('[data-ptab]').forEach(b => b.addEventListener('click', () => setPayTab(b.dataset.ptab)));
+  $$('[data-go]').forEach(b => b.addEventListener('click', () => showView(b.dataset.go)));
+
+  /* ---------- Isi pilihan form ---------- */
+  PAKET_LIST.forEach(p => $('#paket').insertAdjacentHTML('beforeend', `<option>${esc(p)}</option>`));
+  STATUS_LIST.forEach(s => $('#status').insertAdjacentHTML('beforeend', `<option>${esc(s)}</option>`));
+
+  /* ---------- Validasi nomor HP ---------- */
+  function normPhone(raw) {
+    let p = String(raw || '').replace(/[\s\-\.\(\)]/g, '');
+    if (p.indexOf('+62') === 0) p = '0' + p.slice(3);
+    else if (p.indexOf('62') === 0) p = '0' + p.slice(2);
+    return /^08\d{8,11}$/.test(p) ? p : null;
+  }
+  $('#hp').addEventListener('input', function () {
+    const v = this.value.trim();
+    this.classList.remove('is-valid', 'is-invalid');
+    if (!v) return;
+    const n = normPhone(v);
+    this.classList.add(n ? 'is-valid' : 'is-invalid');
+    $('#hpOk').textContent = n ? 'Nomor valid: ' + n : '';
+  });
+
+  function validate() {
+    let ok = true;
+    const set = (el, good) => { el.classList.toggle('is-invalid', !good); el.classList.toggle('is-valid', good && el.id === 'hp'); if (!good) ok = false; };
+    set($('#nama'), $('#nama').value.trim().length >= 3);
+    set($('#hp'), !!normPhone($('#hp').value));
+    set($('#alamat'), $('#alamat').value.trim().length >= 5);
+    set($('#paket'), !!$('#paket').value);
+    if (!ok) { const f = $('.is-invalid'); if (f) f.focus(); }
+    return ok;
+  }
+  ['nama', 'alamat', 'paket'].forEach(id => $('#' + id).addEventListener('input', () => $('#' + id).classList.remove('is-invalid')));
+
+  /* ---------- Render ---------- */
+  function badge(s) { return `<span class="badge-s ${esc(String(s).toLowerCase())}">${esc(s)}</span>`; }
+
+  function rowHtml(r, full) {
+    return `<tr>
+      <td class="cid">${esc(r.id)}</td>
+      <td><strong>${esc(r.nama)}</strong><span class="sub">${esc(r.hp)}</span></td>
+      ${full ? `<td class="d-none d-lg-table-cell">${esc(r.alamat)}</td>` : ''}
+      <td class="d-none d-md-table-cell">${esc(r.paket)}</td>
+      ${full ? `<td class="d-none d-md-table-cell">${esc(r.tgl)}</td>` : ''}
+      <td>${badge(r.status)}</td></tr>`;
+  }
+
+  function emptyRow(cols) {
+    return `<tr><td colspan="${cols}"><div class="empty"><i class="bi bi-inbox"></i>Belum ada pelanggan.<br>
+      <button class="btn btn-neon btn-sm mt-3" onclick="showView('input')">Tambah pelanggan pertama</button></div></td></tr>`;
+  }
+
+  function renderData(rows, q) {
+    q = (q || '').toLowerCase().trim();
+    const list = q ? rows.filter(r => (r.id + ' ' + r.nama + ' ' + r.hp).toLowerCase().includes(q)) : rows;
+    $('#dataBody').innerHTML = list.length
+      ? list.map(r => rowHtml(r, true)).join('')
+      : (q ? `<tr><td colspan="6"><div class="empty">Tidak ada hasil untuk "${esc(q)}".</div></td></tr>` : emptyRow(6));
+  }
+
+  function render(d) {
+    state.rows = d.rows; state.nextId = d.nextId;
+    [['stTotal', d.stats.total], ['stAktif', d.stats.aktif], ['stBulan', d.stats.bulanIni], ['stHari', d.stats.hariIni]]
+      .forEach(([id, v]) => { const el = $('#' + id); el.classList.remove('shimmer'); el.textContent = v; });
+    [['stMasuk', rp(d.stats.pemasukanBulan)], ['stBelum', d.stats.belumBayar]].forEach(([id, v]) => {
+      const el = $('#' + id);
+      el.classList.remove('shimmer');
+      el.classList.toggle('locked', !d.authed);
+      if (d.authed) el.textContent = v; else el.innerHTML = '<i class="bi bi-lock-fill"></i>Terkunci';
+    });
+
+    $('#idprev').value = d.nextId;
+
+    const entries = Object.entries(d.paket).sort((a, b) => b[1] - a[1]);
+    const max = entries.length ? entries[0][1] : 1;
+    $('#paketBars').innerHTML = entries.length
+      ? entries.map(([k, v]) => `<div class="bar-row"><div class="top"><span>${esc(k)}</span><span>${v} pelanggan</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v / max * 100)}%"></div></div></div>`).join('')
+      : '<div class="empty">Belum ada data paket.</div>';
+
+    $('#recentBody').innerHTML = d.rows.length ? d.rows.slice(0, 6).map(r => rowHtml(r, false)).join('') : emptyRow(4);
+    renderData(d.rows, $('#search').value);
+
+    state.customers = d.customers.slice().reverse();
+    state.payments = d.payments; state.nextPayId = d.nextPayId; state.paid = new Set(d.paid);
+    state.tarif = d.tarif || {};
+    state.gratis = d.gratis || [];
+    if (d.authed) $('#payId').value = d.nextPayId;
+    if (!d.authed && state.tokens.bayar) saveToken('bayar', null);
+    applyAuth('bayar', d.authed);
+    if (!d.authedKeu && state.tokens.keuangan) saveToken('keuangan', null);
+    applyAuth('keuangan', d.authedKeu);
+    if (d.authedKeu === undefined && !state.oldServerWarned) {
+      state.oldServerWarned = true;
+      toast('Code.gs di server belum versi terbaru, login keuangan tidak akan jalan. Tempel Code.gs terbaru lalu Deploy sebagai New version.');
+    }
+    renderPayments(); refreshPeriodeHint();
+  }
+
+  function toast(msg) {
+    $('#errMsg').textContent = msg;
+    bootstrap.Toast.getOrCreateInstance($('#errToast'), { delay: 5000 }).show();
+  }
+
+  let loadSeq = 0;
+  function loadData() {
+    const mine = ++loadSeq;
+    google.script.run
+      .withSuccessHandler(d => { if (mine === loadSeq) render(d); })
+      .withFailureHandler(e => toast('Gagal memuat data: ' + (e && e.message ? e.message : e)))
+      .getAppData(state.tokens.bayar, state.tokens.keuangan);
+  }
+
+  $('#search').addEventListener('input', e => renderData(state.rows, e.target.value));
+  $('#btnRefresh').addEventListener('click', loadData);
+
+  /* ---------- Simpan ---------- */
+  function setSaving(on) {
+    $('#formCard').classList.toggle('is-saving', on);
+    $('#btnSave').disabled = on;
+    $('#btnSpin').classList.toggle('d-none', !on);
+    $('#btnIcon').classList.toggle('d-none', on);
+    $('#btnText').textContent = on ? 'Menyimpan…' : 'Simpan pelanggan';
+  }
+
+  function resetForm() {
+    $('#custForm').reset();
+    $$('#custForm .is-valid, #custForm .is-invalid').forEach(el => el.classList.remove('is-valid', 'is-invalid'));
+    setToday();
+    $('#idprev').value = state.nextId;
+  }
+  $('#btnReset').addEventListener('click', () => setTimeout(resetForm, 0));
+
+  $('#custForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!validate()) return;
+    const payload = {
+      nama: $('#nama').value.trim(),
+      hp: normPhone($('#hp').value),
+      alamat: $('#alamat').value.trim(),
+      paket: $('#paket').value,
+      status: $('#status').value,
+      catatan: $('#catatan').value.trim()
+    };
+    setSaving(true);
+    google.script.run
+      .withSuccessHandler(function (res) {
+        setSaving(false);
+        if (!res.success) { toast(res.message); return; }
+        showSuccess({ title: 'Pelanggan tersimpan', sub: res.nama, id: res.id, again: 'Tambah pelanggan lagi', toText: 'Lihat data pelanggan', target: 'data' });
+        resetForm();
+        loadData();
+      })
+      .withFailureHandler(function (err) {
+        setSaving(false);
+        toast('Gagal menyimpan: ' + (err && err.message ? err.message : err));
+      })
+      .savePelanggan(payload);
+  });
+
+  $('#okToData').addEventListener('click', () => showView(state.okTarget));
+
+  /* ---------- Pembayaran ---------- */
+  function rp(n) { return 'Rp ' + Number(n || 0).toLocaleString('id-ID'); }
+  function periodeLabel(p) {
+    const m = /^(\d{4})-(\d{2})$/.exec(p || '');
+    return m ? BULAN[+m[2] - 1] + ' ' + m[1] : String(p || '');
+  }
+  function currentPeriode() { return $('#pTahun').value + '-' + $('#pBulan').value; }
+  function setPeriodeDefault() {
+    const now = new Date();
+    $('#pBulan').value = String(now.getMonth() + 1).padStart(2, '0');
+    $('#pTahun').value = String(now.getFullYear());
+  }
+  (function () {
+    const y = new Date().getFullYear();
+    $('#pBulan').innerHTML = BULAN.map((b, i) => `<option value="${String(i + 1).padStart(2, '0')}">${b}</option>`).join('');
+    $('#pTahun').innerHTML = [y - 1, y, y + 1].map(v => `<option>${v}</option>`).join('');
+    setPeriodeDefault();
+  })();
+
+  function showSuccess(o) {
+    $('#okTitle').textContent = o.title; $('#okName').textContent = o.sub; $('#okId').textContent = o.id;
+    $('#okAgain').textContent = o.again; $('#okToData').textContent = o.toText; state.okTarget = o.target;
+    bootstrap.Modal.getOrCreateInstance($('#okModal')).show();
+  }
+
+  // Mengembalikan true jika periode terpilih sudah dibayar pelanggan tersebut
+  function refreshPeriodeHint() {
+    const el = $('#periodeHint');
+    el.className = 'hint'; el.textContent = '';
+    if (!state.picked) return false;
+    const p = currentPeriode();
+    if (state.paid.has(state.picked.id + '|' + p)) {
+      el.classList.add('bad');
+      el.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>' + esc(periodeLabel(p)) + ' sudah tercatat dibayar.';
+      return true;
+    }
+    if (isFreeIn(state.picked.id, p)) {
+      el.classList.add('warn');
+      el.innerHTML = '<i class="bi bi-gift me-1"></i>' + esc(periodeLabel(p)) + ' bebas tagihan untuk pelanggan ini.';
+      return false;
+    }
+    el.classList.add('good');
+    el.innerHTML = '<i class="bi bi-check-circle me-1"></i>' + esc(periodeLabel(p)) + ' belum dibayar.';
+    return false;
+  }
+  ['pBulan', 'pTahun'].forEach(id => $('#' + id).addEventListener('change', refreshPeriodeHint));
+
+  /* Pemilih pelanggan */
+  const picker = { items: [], idx: -1 };
+  function openResults(q) {
+    q = (q || '').toLowerCase().trim();
+    const list = q ? state.customers.filter(c => (c.id + ' ' + c.nama + ' ' + c.hp).toLowerCase().includes(q)) : state.customers;
+    picker.items = list.slice(0, 8);
+    picker.idx = picker.items.length ? 0 : -1;
+    $('#custResults').innerHTML = picker.items.length
+      ? picker.items.map((c, i) => `<button type="button" class="pick${i === 0 ? ' on' : ''}" role="option" data-i="${i}">
+          <span><strong>${esc(c.nama)}</strong><span class="sub"><span class="cid">${esc(c.id)}</span> &nbsp;${esc(c.hp)}</span></span>${badge(c.status)}</button>`).join('')
+      : `<div class="empty py-3">${state.customers.length ? 'Pelanggan tidak ditemukan.' : 'Belum ada pelanggan. Tambahkan dulu di menu Input pelanggan.'}</div>`;
+    $('#custResults').classList.add('open');
+    $('#custSearch').setAttribute('aria-expanded', 'true');
+  }
+  function closeResults() {
+    $('#custResults').classList.remove('open');
+    $('#custSearch').setAttribute('aria-expanded', 'false');
+  }
+  function pickCustomer(c) {
+    if (!c) return;
+    state.picked = c;
+    $('#pkAvatar').textContent = (c.nama.trim().charAt(0) || '?').toUpperCase();
+    $('#pkNama').textContent = c.nama;
+    $('#pkSub').innerHTML = `<span class="cid">${esc(c.id)}</span> &nbsp;${esc(c.hp)} &nbsp;${esc(c.paket)}`;
+    $('#custPicked').classList.add('show');
+    $('#picker').classList.add('d-none');
+    $('#custSearch').classList.remove('is-invalid');
+    const harga = state.tarif[c.paket] || HARGA_PAKET[c.paket];
+    if (harga && !$('#pJumlah').value) $('#pJumlah').value = Number(harga).toLocaleString('id-ID');
+    closeResults();
+    refreshPeriodeHint();
+  }
+  function clearPicked(focus) {
+    state.picked = null;
+    $('#custPicked').classList.remove('show');
+    $('#picker').classList.remove('d-none');
+    $('#custSearch').value = '';
+    refreshPeriodeHint();
+    if (focus) $('#custSearch').focus();
+  }
+  $('#custSearch').addEventListener('input', function () { this.classList.remove('is-invalid'); openResults(this.value); });
+  $('#custSearch').addEventListener('focus', function () { openResults(this.value); });
+  $('#custSearch').addEventListener('keydown', function (e) {
+    const box = $('#custResults');
+    if (!box.classList.contains('open')) { if (e.key === 'ArrowDown') openResults(this.value); return; }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const n = picker.items.length; if (!n) return;
+      picker.idx = (picker.idx + (e.key === 'ArrowDown' ? 1 : -1) + n) % n;
+      $$('.pick', box).forEach((b, i) => b.classList.toggle('on', i === picker.idx));
+      const on = $('.pick.on', box); if (on) on.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (picker.idx > -1) pickCustomer(picker.items[picker.idx]);
+    } else if (e.key === 'Escape') { closeResults(); }
+  });
+  $('#custResults').addEventListener('click', e => {
+    const b = e.target.closest('.pick');
+    if (b) pickCustomer(picker.items[+b.dataset.i]);
+  });
+  document.addEventListener('click', e => { if (!$('#picker').contains(e.target)) closeResults(); });
+  $('#pkChange').addEventListener('click', () => clearPicked(true));
+
+  /* Jumlah & metode */
+  function jumlahVal() { return Number($('#pJumlah').value.replace(/\D/g, '')) || 0; }
+  $('#pJumlah').addEventListener('input', function () {
+    const d = this.value.replace(/\D/g, '').slice(0, 10);
+    this.value = d ? Number(d).toLocaleString('id-ID') : '';
+    this.classList.remove('is-invalid');
+  });
+  $$('input[name="metode"]').forEach(r => r.addEventListener('change', () => $('#metodeErr').classList.add('d-none')));
+
+  function validatePay() {
+    let ok = true, first = null;
+    const bad = el => { ok = false; if (!first) first = el; };
+    if (!state.picked) { $('#custSearch').classList.add('is-invalid'); bad($('#custSearch')); }
+    const j = jumlahVal();
+    const valid = j > 0 && j <= 100000000;
+    $('#pJumlah').classList.toggle('is-invalid', !valid);
+    if (!valid) bad($('#pJumlah'));
+    if (!$('input[name="metode"]:checked')) { $('#metodeErr').classList.remove('d-none'); bad($('input[name="metode"]')); }
+    if (state.picked && refreshPeriodeHint()) bad($('#pBulan'));
+    if (first) first.focus();
+    return ok;
+  }
+
+  function setPaySaving(on) {
+    $('#payCard').classList.toggle('is-saving', on);
+    $('#btnPaySave').disabled = on;
+    $('#paySpin').classList.toggle('d-none', !on);
+    $('#payIcon').classList.toggle('d-none', on);
+    $('#payText').textContent = on ? 'Menyimpan…' : 'Simpan pembayaran';
+  }
+
+  function resetPayForm() {
+    $('#payForm').reset();
+    clearPicked(false);
+    buktiBayar.clear();
+    $$('#payForm .is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    $('#metodeErr').classList.add('d-none');
+    setPeriodeDefault();
+    $('#payTgl').value = todayLong();
+    $('#payId').value = state.nextPayId;
+    refreshPeriodeHint();
+  }
+  $('#btnPayReset').addEventListener('click', () => setTimeout(resetPayForm, 0));
+
+  $('#payForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!validatePay()) return;
+    if (buktiBayar.busy) { toast('Foto bukti masih diproses, coba lagi sebentar.'); return; }
+    const payload = {
+      idp: state.picked.id,
+      periode: currentPeriode(),
+      jumlah: jumlahVal(),
+      metode: $('input[name="metode"]:checked').value,
+      catatan: $('#pCatatan').value.trim(),
+      bukti: buktiBayar.file
+    };
+    $('#payOverlayText').textContent = buktiBayar.file ? 'Mengunggah bukti dan menyimpan…' : 'Menyimpan pembayaran…';
+    setPaySaving(true);
+    google.script.run
+      .withSuccessHandler(function (res) {
+        setPaySaving(false);
+        if (!res.success) { if (res.code === 'AUTH') { handleAuthLost('bayar', res.message); return; } toast(res.message); return; }
+        showSuccess({
+          title: 'Pembayaran tersimpan',
+          sub: res.nama + ', ' + periodeLabel(res.periode) + ', ' + rp(res.jumlah),
+          id: res.id, again: 'Catat pembayaran lagi', toText: 'Ke dashboard', target: 'dashboard'
+        });
+        resetPayForm();
+        loadData();
+        if (state.tagihan.periode) loadTagihan();
+      })
+      .withFailureHandler(function (err) {
+        setPaySaving(false);
+        toast('Gagal menyimpan: ' + (err && err.message ? err.message : err));
+      })
+      .savePembayaran(payload, state.tokens.bayar);
+  });
+
+  /* Unggah foto bukti (dipakai menu pembayaran dan keuangan) */
+  const MAX_FILE_MB = 15;
+  function fmtSize(bytes) {
+    return bytes >= 1048576 ? (bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(bytes / 1024)) + ' KB';
+  }
+
+  // Kecilkan foto agar unggahan cepat (maks. 1400 px, JPEG)
+  function compressImage(file, maxDim, quality) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = function () {
+        try {
+          const scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+          const w = Math.max(1, Math.round(img.naturalWidth * scale));
+          const h = Math.max(1, Math.round(img.naturalHeight * scale));
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          const ctx = c.getContext('2d');
+          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = c.toDataURL('image/jpeg', quality);
+          URL.revokeObjectURL(url);
+          resolve({ dataUrl: dataUrl, data: dataUrl.split(',')[1] });
+        } catch (e) { URL.revokeObjectURL(url); reject(e); }
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('load')); };
+      img.src = url;
+    });
+  }
+
+  // ids: selektor untuk input, zone, prev, thumb, name, size, remove, err
+  function makeUploader(ids) {
+    const u = { file: null, busy: false };
+    const el = k => $(ids[k]);
+    const err = msg => { el('err').textContent = msg || ''; el('err').classList.toggle('d-none', !msg); };
+
+    async function handle(file) {
+      err('');
+      if (!file) return;
+      if (!/^image\//.test(file.type)) { err('File harus berupa gambar (JPG, PNG, atau WebP).'); return; }
+      if (file.size > MAX_FILE_MB * 1048576) { err('Ukuran foto maksimal ' + MAX_FILE_MB + ' MB.'); return; }
+      u.busy = true;
+      try {
+        const r = await compressImage(file, 1400, 0.82);
+        u.file = { name: file.name.replace(/\.[^.]+$/, '') + '.jpg', mime: 'image/jpeg', data: r.data };
+        el('thumb').src = r.dataUrl;
+        el('name').textContent = file.name;
+        el('size').textContent = fmtSize(file.size) + ' dikecilkan menjadi ' + fmtSize(Math.round(r.data.length * 0.75));
+        el('prev').classList.add('show');
+        el('zone').classList.add('d-none');
+      } catch (e) {
+        err('Foto tidak bisa dibaca. Coba format JPG, PNG, atau WebP.');
+      } finally {
+        u.busy = false;
+      }
+    }
+
+    u.clear = function () {
+      u.file = null;
+      el('input').value = '';
+      el('thumb').removeAttribute('src');
+      el('prev').classList.remove('show');
+      el('zone').classList.remove('d-none', 'drag');
+      err('');
+    };
+
+    el('input').addEventListener('change', e => handle(e.target.files[0]));
+    el('remove').addEventListener('click', u.clear);
+    el('zone').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el('input').click(); } });
+    ['dragenter', 'dragover'].forEach(ev => el('zone').addEventListener(ev, e => { e.preventDefault(); el('zone').classList.add('drag'); }));
+    ['dragleave', 'drop'].forEach(ev => el('zone').addEventListener(ev, e => { e.preventDefault(); el('zone').classList.remove('drag'); }));
+    el('zone').addEventListener('drop', e => handle(e.dataTransfer.files[0]));
+    return u;
+  }
+
+  const buktiBayar = makeUploader({ input: '#pBukti', zone: '#dropzone', prev: '#buktiPrev', thumb: '#buktiThumb', name: '#buktiName', size: '#buktiSize', remove: '#buktiRemove', err: '#buktiErr' });
+  const buktiKeu = makeUploader({ input: '#kBukti', zone: '#kDropzone', prev: '#kBuktiPrev', thumb: '#kBuktiThumb', name: '#kBuktiName', size: '#kBuktiSize', remove: '#kBuktiRemove', err: '#kBuktiErr' });
+
+  // Lihat bukti dari riwayat pembayaran / tabel laporan keuangan
+  $('#payBody').addEventListener('click', e => {
+    const b = e.target.closest('[data-bukti]');
+    if (b) openBukti(b.dataset.bukti, 'bayar');
+  });
+  $('#keuBody').addEventListener('click', e => {
+    const b = e.target.closest('[data-bukti]');
+    if (b) openBukti(b.dataset.bukti, 'keuangan');
+  });
+  function openBukti(id, scope) {
+    const keu = scope === 'keuangan';
+    const rec = keu ? (state.keu.rows || []).find(x => x.id === id) : state.payments.find(x => x.id === id);
+    $('#bkTitle').textContent = 'Bukti ' + id;
+    $('#bkMeta').textContent = !rec ? '' : (keu ? rec.ket + ', ' + rp(rec.jumlah) : rec.nama + ', ' + periodeLabel(rec.periode) + ', ' + rp(rec.jumlah));
+    $('#bkLinkWrap').classList.add('d-none');
+    $('#bkBody').innerHTML = '<div class="py-5"><div class="ring mx-auto"></div></div>';
+    bootstrap.Modal.getOrCreateInstance($('#buktiModal')).show();
+    const run = google.script.run
+      .withSuccessHandler(res => {
+        if (res.code === 'AUTH') { bootstrap.Modal.getOrCreateInstance($('#buktiModal')).hide(); handleAuthLost(scope, res.message); return; }
+        if (!res.success || !/^image\/(jpeg|png|webp)$/.test(res.mime)) {
+          $('#bkBody').innerHTML = `<div class="empty">${esc(res.message || 'File bukti tidak dapat ditampilkan.')}</div>`;
+          return;
+        }
+        const img = new Image();
+        img.className = 'bukti-img';
+        img.alt = 'Bukti ' + id;
+        img.src = 'data:' + res.mime + ';base64,' + res.data;
+        $('#bkBody').innerHTML = '';
+        $('#bkBody').appendChild(img);
+        $('#bkLink').href = res.url;
+        $('#bkLinkWrap').classList.remove('d-none');
+      })
+      .withFailureHandler(err => {
+        $('#bkBody').innerHTML = `<div class="empty">${esc(err && err.message ? err.message : err)}</div>`;
+      });
+    if (keu) run.getBuktiKeuangan(id, state.tokens.keuangan); else run.getBukti(id, state.tokens.bayar);
+  }
+
+  /* Riwayat */
+  function renderPayments() {
+    const q = ($('#paySearch').value || '').toLowerCase().trim();
+    const list = q
+      ? state.payments.filter(p => (p.id + ' ' + p.idp + ' ' + p.nama + ' ' + periodeLabel(p.periode)).toLowerCase().includes(q))
+      : state.payments;
+    $('#payTotal').textContent = rp(list.reduce((t, p) => t + p.jumlah, 0));
+    $('#payBody').innerHTML = list.length
+      ? list.map(p => `<tr>
+          <td class="cid">${esc(p.id)}</td>
+          <td><strong>${esc(p.nama)}</strong><span class="sub">${esc(p.idp)}</span></td>
+          <td>${esc(periodeLabel(p.periode))}</td>
+          <td class="text-end fw-bold">${esc(rp(p.jumlah))}</td>
+          <td class="d-none d-md-table-cell">${esc(p.metode)}</td>
+          <td class="d-none d-md-table-cell">${esc(p.tgl)}</td>
+          <td class="text-center">${p.bukti
+            ? `<button type="button" class="btn btn-ghost btn-sm px-2" data-bukti="${esc(p.id)}" aria-label="Lihat bukti ${esc(p.id)}"><i class="bi bi-image"></i></button>`
+            : '<span class="text-secondary">-</span>'}</td></tr>`).join('')
+      : `<tr><td colspan="7"><div class="empty"><i class="bi bi-receipt"></i>${q ? 'Tidak ada hasil.' : 'Belum ada pembayaran tercatat.'}</div></td></tr>`;
+  }
+  $('#paySearch').addEventListener('input', renderPayments);
+
+  /* ---------- Login per menu ---------- */
+  const AUTH = {
+    bayar: {
+      key: '3net_token_bayar', icon: 'bi-cash-coin', lock: '#bayarLock', content: '#bayarContent', logout: '#btnLogout', p: 'lgBayar',
+      title: 'Masuk untuk mencatat pembayaran', sub: 'Menu ini khusus petugas billing 3NET.',
+      onLogin: () => { if (state.view === 'bayar') loadPayTab(); },
+      onLogout: () => { resetPayForm(); state.tagihan.rows = []; state.tagihan.periode = ''; state.gr.rows = []; state.gratis = []; }
+    },
+    keuangan: {
+      key: '3net_token_keuangan', icon: 'bi-journal-text', lock: '#keuLock', content: '#keuContent', logout: '#btnLogoutKeu', p: 'lgKeu',
+      title: 'Masuk untuk mencatat keuangan', sub: 'Menu ini khusus pengelola keuangan 3NET.',
+      onLogin: () => loadKeu(), onLogout: () => resetKeuForm()
+    }
+  };
+
+  function saveToken(scope, t) {
+    state.tokens[scope] = t || null;
+    try { t ? sessionStorage.setItem(AUTH[scope].key, t) : sessionStorage.removeItem(AUTH[scope].key); } catch (e) { /* storage diblokir, token tetap di memori */ }
+  }
+  function applyAuth(scope, authed) {
+    const a = AUTH[scope];
+    state.auth[scope] = !!authed;
+    $(a.lock).classList.toggle('d-none', !!authed);
+    $(a.content).classList.toggle('d-none', !authed);
+    $$('[data-view="' + scope + '"] i').forEach(i => { i.className = 'bi ' + (authed ? (i.parentElement.dataset.icon || a.icon) : 'bi-lock-fill'); });
+  }
+  function handleAuthLost(scope, msg) {
+    saveToken(scope, null);
+    applyAuth(scope, false);
+    toast(msg || 'Sesi login berakhir. Silakan masuk lagi.');
+    loadData();
+  }
+
+  function loginCardHtml(a) {
+    const p = a.p;
+    return `<form class="form-card glass login-card" id="${p}Form" novalidate>
+      <div class="saving-overlay" aria-live="polite"><div class="ring"></div><strong>Memeriksa akun…</strong></div>
+      <div class="lock-ico"><i class="bi bi-shield-lock-fill"></i></div>
+      <h2>${esc(a.title)}</h2>
+      <p class="lead-sub">${esc(a.sub)}</p>
+      <div class="mb-3">
+        <label class="form-label" for="${p}User">Username</label>
+        <input class="form-control" id="${p}User" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="${p}Pass">Password</label>
+        <div class="input-group pw-group">
+          <input class="form-control" id="${p}Pass" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+          <button type="button" class="btn btn-ghost" id="${p}Toggle" aria-label="Tampilkan password"><i class="bi bi-eye"></i></button>
+        </div>
+      </div>
+      <div class="hint bad d-none" id="${p}Err" role="alert"></div>
+      <button type="submit" class="btn btn-neon w-100 mt-3" id="${p}Btn">Masuk</button>
+    </form>`;
+  }
+
+  Object.keys(AUTH).forEach(scope => {
+    const a = AUTH[scope];
+    const q = part => $('#' + a.p + part);
+    $(a.lock).innerHTML = loginCardHtml(a);
+    const err = msg => { q('Err').textContent = msg || ''; q('Err').classList.toggle('d-none', !msg); };
+
+    q('Toggle').addEventListener('click', () => {
+      const pw = q('Pass'), show = pw.type === 'password';
+      pw.type = show ? 'text' : 'password';
+      q('Toggle').querySelector('i').className = 'bi ' + (show ? 'bi-eye-slash' : 'bi-eye');
+      q('Toggle').setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password');
+    });
+
+    q('Form').addEventListener('submit', e => {
+      e.preventDefault();
+      const u = q('User').value.trim(), pw = q('Pass').value;
+      if (!u || !pw) { err('Isi username dan password.'); return; }
+      err('');
+      q('Form').classList.add('is-saving');
+      q('Btn').disabled = true;
+      google.script.run
+        .withSuccessHandler(res => {
+          q('Form').classList.remove('is-saving');
+          q('Btn').disabled = false;
+          if (!res.success) {
+            err(res.message === 'Menu tidak dikenal.' ? 'Code.gs di server belum versi terbaru. Deploy ulang sebagai New version.' : res.message);
+            q('Pass').value = ''; q('Pass').focus(); return;
+          }
+          q('User').value = ''; q('Pass').value = '';
+          saveToken(scope, res.token);
+          applyAuth(scope, true);
+          if (a.onLogin) a.onLogin();
+          loadData();
+        })
+        .withFailureHandler(e2 => {
+          q('Form').classList.remove('is-saving');
+          q('Btn').disabled = false;
+          err('Gagal masuk: ' + (e2 && e2.message ? e2.message : e2));
+        })
+        .login(u, pw, scope);
+    });
+
+    $(a.logout).addEventListener('click', () => {
+      const t = state.tokens[scope];
+      saveToken(scope, null);
+      if (a.onLogout) a.onLogout();
+      applyAuth(scope, false);
+      if (t) google.script.run.logout(t);
+      loadData();
+    });
+  });
+
+  /* ---------- Laporan keuangan ---------- */
+  const KATEGORI = {
+    'Pemasukan': ['Pemasangan baru', 'Penjualan perangkat', 'Lainnya'],
+    'Pengeluaran': ['Bandwidth / upstream', 'Gaji / honor', 'Listrik', 'Perangkat & kabel', 'Operasional', 'Lainnya']
+  };
+
+  function todayISO() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function setKeuDate() {
+    const t = state.keu.today || todayISO();
+    $('#kTgl').value = t;
+    $('#kTgl').max = t;
+  }
+  function fmtTgl(iso) {            // yyyy-MM-dd -> DD/MM/YYYY (sama dengan format di spreadsheet)
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+    return m ? m[3] + '/' + m[2] + '/' + m[1] : iso;
+  }
+  function fillKategori() {
+    const chosen = $('input[name="kjenis"]:checked');
+    const list = chosen ? KATEGORI[chosen.value] : [];
+    $('#kKategori').innerHTML = '<option value="" selected disabled>Pilih kategori</option>' + list.map(k => `<option>${esc(k)}</option>`).join('');
+  }
+  (function () {
+    const now = new Date();
+    const opts = [];
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const v = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+      opts.push(`<option value="${v}">${esc(periodeLabel(v))}</option>`);
+    }
+    $('#keuBulan').innerHTML = opts.join('');
+    fillKategori();
+    setKeuDate();
+  })();
+
+  $$('input[name="kjenis"]').forEach(r => r.addEventListener('change', fillKategori));
+  $('#kKategori').addEventListener('change', () => $('#kKategori').classList.remove('is-invalid'));
+  $('#kTgl').addEventListener('input', () => $('#kTgl').classList.remove('is-invalid'));
+  $('#kKet').addEventListener('input', () => $('#kKet').classList.remove('is-invalid'));
+  $('#keuBulan').addEventListener('change', loadKeu);
+
+  function kJumlahVal() { return Number($('#kJumlah').value.replace(/\D/g, '')) || 0; }
+  $('#kJumlah').addEventListener('input', function () {
+    const d = this.value.replace(/\D/g, '').slice(0, 10);
+    this.value = d ? Number(d).toLocaleString('id-ID') : '';
+    this.classList.remove('is-invalid');
+  });
+
+  function loadKeu() {
+    if (!state.auth.keuangan) return;
+    google.script.run
+      .withSuccessHandler(renderKeu)
+      .withFailureHandler(e => toast('Gagal memuat laporan: ' + (e && e.message ? e.message : e)))
+      .getKeuanganData(state.tokens.keuangan, $('#keuBulan').value);
+  }
+
+  function renderKeu(res) {
+    if (res.code === 'AUTH') { handleAuthLost('keuangan', res.message); return; }
+    if (res.bulan !== $('#keuBulan').value) return;   // jawaban usang dari pilihan bulan sebelumnya
+    state.keu.today = res.today;
+    state.keu.nextId = res.nextId;
+    state.keu.rows = res.rows;
+    const r = res.ringkasan;
+    const when = res.bulan === res.today.slice(0, 7) ? 'bulan ini' : periodeLabel(res.bulan);
+
+    $('#kMasukLbl').textContent = 'Pemasukan ' + when;
+    $('#kKeluarLbl').textContent = 'Pengeluaran ' + when;
+    $('#kSaldoLbl').textContent = 'Saldo ' + when;
+    $('#keuTitle').textContent = 'Transaksi ' + when;
+
+    const set = (id, text) => { const el = $('#' + id); el.classList.remove('shimmer'); el.textContent = text; };
+    set('kMasuk', rp(r.masuk));
+    set('kKeluar', rp(r.keluar));
+    set('kSaldo', (r.saldo < 0 ? '-' : '') + rp(Math.abs(r.saldo)));
+    $('#kSaldo').classList.toggle('neg', r.saldo < 0);
+    $('#kMasukDetail').textContent = 'Iuran pelanggan ' + rp(r.iuran) + ', lainnya ' + rp(r.lain);
+    const sa = res.semua;
+    set('kSaldoAkhir', (sa.saldo < 0 ? '-' : '') + rp(Math.abs(sa.saldo)));
+    $('#kSaldoAkhir').classList.toggle('neg', sa.saldo < 0);
+    $('#kSaldoAkhirDetail').textContent = 'Total pemasukan ' + rp(sa.masuk) + ' (iuran ' + rp(sa.iuran) + ', lainnya ' + rp(sa.lain) + '), total pengeluaran ' + rp(sa.keluar);
+    $('#keuTotMasuk').textContent = rp(r.masuk);
+    $('#keuTotKeluar').textContent = rp(r.keluar);
+
+    $('#keuNote').textContent = 'Iuran pelanggan diambil otomatis dari menu Input pembayaran berdasarkan tanggal bayar.'
+      + (res.truncated ? ' Menampilkan ' + res.rows.length + ' dari ' + res.total + ' transaksi terbaru, total di atas mencakup semuanya.' : '');
+
+    $('#kId').value = res.nextId;
+    // Tanggal server (WIB) jadi acuan: jam perangkat yang lebih maju tidak boleh membuat tanggal default "masa depan"
+    $('#kTgl').max = res.today;
+    if (!$('#kTgl').value || $('#kTgl').value > res.today) $('#kTgl').value = res.today;
+
+    const none = '<td class="text-end text-secondary">-</td>';
+    $('#keuBody').innerHTML = res.rows.length
+      ? res.rows.map(t => {
+          const masuk = t.jenis === 'Pemasukan';
+          const amt = `<td class="text-end fw-bold text-nowrap ${masuk ? 'amt-in' : 'amt-out'}">${masuk ? '+' : '-'}${esc(rp(t.jumlah))}</td>`;
+          return `<tr>
+            <td class="cid d-none d-md-table-cell">${esc(t.id)}</td>
+            <td class="text-nowrap d-none d-md-table-cell">${esc(fmtTgl(t.tgl))}</td>
+            <td><strong>${esc(t.ket)}</strong><span class="sub">${esc(t.kategori)}<span class="d-md-none">, ${esc(fmtTgl(t.tgl))}</span></span></td>
+            ${masuk ? amt + none : none + amt}
+            <td class="text-center">${t.bukti
+              ? `<button type="button" class="btn btn-ghost btn-sm px-2" data-bukti="${esc(t.id)}" aria-label="Lihat bukti ${esc(t.id)}"><i class="bi bi-image"></i></button>`
+              : '<span class="text-secondary">-</span>'}</td></tr>`;
+        }).join('')
+      : '<tr><td colspan="6"><div class="empty"><i class="bi bi-journal-text"></i>Belum ada transaksi di periode ini.</div></td></tr>';
+  }
+
+  function validateKeu() {
+    let ok = true, first = null;
+    const bad = el => { el.classList.add('is-invalid'); ok = false; if (!first) first = el; };
+    if (!$('#kKategori').value) bad($('#kKategori'));
+    const tg = $('#kTgl').value;
+    if (!tg || tg > (state.keu.today || todayISO())) bad($('#kTgl'));
+    const j = kJumlahVal();
+    if (!(j > 0 && j <= 1000000000)) bad($('#kJumlah'));
+    if ($('#kKet').value.trim().length < 3) bad($('#kKet'));
+    if (first) first.focus();
+    return ok;
+  }
+
+  function setKeuSaving(on) {
+    $('#keuCard').classList.toggle('is-saving', on);
+    $('#btnKeuSave').disabled = on;
+    $('#keuSpin').classList.toggle('d-none', !on);
+    $('#keuIcon').classList.toggle('d-none', on);
+    $('#keuText').textContent = on ? 'Menyimpan…' : 'Simpan transaksi';
+  }
+
+  function resetKeuForm() {
+    $('#keuForm').reset();
+    buktiKeu.clear();
+    fillKategori();
+    $$('#keuForm .is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    $('#kTgl').value = '';
+    setKeuDate();
+    $('#kId').value = state.keu.nextId;
+  }
+  $('#btnKeuReset').addEventListener('click', () => setTimeout(resetKeuForm, 0));
+
+  $('#keuForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!validateKeu()) return;
+    if (buktiKeu.busy) { toast('Foto bukti masih diproses, coba lagi sebentar.'); return; }
+    const payload = {
+      jenis: $('input[name="kjenis"]:checked').value,
+      kategori: $('#kKategori').value,
+      tanggal: $('#kTgl').value,
+      jumlah: kJumlahVal(),
+      keterangan: $('#kKet').value.trim(),
+      bukti: buktiKeu.file
+    };
+    $('#keuOverlayText').textContent = buktiKeu.file ? 'Mengunggah bukti dan menyimpan…' : 'Menyimpan transaksi…';
+    setKeuSaving(true);
+    google.script.run
+      .withSuccessHandler(res => {
+        setKeuSaving(false);
+        if (!res.success) {
+          if (res.code === 'AUTH') { handleAuthLost('keuangan', res.message); return; }
+          toast(res.message);
+          return;
+        }
+        showSuccess({
+          title: 'Transaksi tersimpan',
+          sub: res.jenis + ', ' + res.kategori + ', ' + rp(res.jumlah),
+          id: res.id, again: 'Catat transaksi lagi', toText: 'Ke dashboard', target: 'dashboard'
+        });
+        const m = payload.tanggal.slice(0, 7);
+        if ($('#keuBulan option[value="' + m + '"]')) $('#keuBulan').value = m;
+        resetKeuForm();
+        loadKeu();
+      })
+      .withFailureHandler(err => {
+        setKeuSaving(false);
+        toast('Gagal menyimpan: ' + (err && err.message ? err.message : err));
+      })
+      .saveKeuangan(payload, state.tokens.keuangan);
+  });
+
+  /* ---------- Tagihan pelanggan ---------- */
+  (function () {
+    const y = new Date().getFullYear(), m = String(new Date().getMonth() + 1).padStart(2, '0');
+    $('#tgBulan').innerHTML = BULAN.map((b, i) => `<option value="${String(i + 1).padStart(2, '0')}">${b}</option>`).join('');
+    $('#tgTahun').innerHTML = [y - 1, y, y + 1].map(v => `<option>${v}</option>`).join('');
+    $('#tgBulan').value = m; $('#tgTahun').value = String(y);
+  })();
+  function tgPeriode() { return $('#tgTahun').value + '-' + $('#tgBulan').value; }
+  ['tgBulan', 'tgTahun'].forEach(id => $('#' + id).addEventListener('change', loadTagihan));
+  $('#btnTgRefresh').addEventListener('click', loadTagihan);
+
+  function loadTagihan() {
+    if (!state.auth.bayar) return;
+    const mine = ++state.tagihan.seq;
+    google.script.run
+      .withSuccessHandler(res => {
+        if (mine !== state.tagihan.seq) return;            // jawaban usang
+        if (res.code === 'AUTH') { handleAuthLost('bayar', res.message); return; }
+        renderTagihan(res);
+      })
+      .withFailureHandler(e => toast('Gagal memuat tagihan: ' + (e && e.message ? e.message : e)))
+      .getTagihan(state.tokens.bayar, tgPeriode());
+  }
+
+  function renderTagihan(res) {
+    const T = state.tagihan, r = res.ringkasan;
+    T.rows = res.rows; T.periode = res.periode; T.pakets = res.pakets;
+    state.tarif = res.tarif || state.tarif;
+
+    const set = (id, text) => { const el = $('#' + id); el.classList.remove('shimmer'); el.textContent = text; };
+    set('tgTotal', rp(r.total)); set('tgTerbayar', rp(r.terbayar)); set('tgBelum', rp(r.belum));
+    set('tgLunas', r.lunas + ' / ' + r.pelanggan);
+    $('#tgBelumLbl').textContent = 'Belum dibayar (' + r.belumCount + ' pelanggan)';
+
+    const paidTagihan = res.rows.filter(x => x.status === 'Lunas').reduce((t, x) => t + x.tagihan, 0);
+    const pct = r.total > 0 ? Math.min(100, Math.round(paidTagihan / r.total * 100)) : 0;
+    $('#tgPct').textContent = pct + '%';
+    $('#tgBar').style.width = pct + '%';
+
+    const notice = res.tarifKosong || r.tanpaTarif > 0;
+    $('#tgNotice').classList.toggle('d-none', !notice);
+    $('#tgNoticeTitle').textContent = res.tarifKosong ? 'Tarif paket belum diatur.' : r.tanpaTarif + ' pelanggan memakai paket yang belum punya tarif.';
+
+    const f = k => k === 'belum' ? r.belumCount + r.tanpaTarif : k === 'lunas' ? r.lunas : k === 'gratis' ? (r.gratis || 0) : res.rows.length;
+    $$('#tgFilter [data-f]').forEach(b => { b.textContent = ({ semua: 'Semua', belum: 'Belum bayar', lunas: 'Lunas', gratis: 'Bebas tagihan' })[b.dataset.f] + ' (' + f(b.dataset.f) + ')'; });
+    renderTagihanRows();
+  }
+
+  function waPhone(hp) { const d = String(hp || '').replace(/\D/g, ''); return d.charAt(0) === '0' ? '62' + d.slice(1) : d; }
+  function waText(r, periode) {
+    const when = periodeLabel(periode);
+    if (r.status === 'Lunas') {
+      return 'Halo ' + r.nama + ', pembayaran tagihan WiFi 3NET periode ' + when + ' sebesar ' + rp(r.jumlahBayar) +
+        ' sudah kami terima pada ' + r.tglBayar + '. Terima kasih.';
+    }
+    return 'Halo ' + r.nama + ', kami dari 3NET.\nPengingat tagihan WiFi periode ' + when + ':\nPaket: ' + r.paket + '\nTagihan: ' + rp(r.tagihan) +
+      '\nMohon segera melakukan pembayaran. Abaikan pesan ini bila sudah membayar.' + (INFO_PEMBAYARAN ? '\n\nPembayaran ke:\n' + INFO_PEMBAYARAN : '') + '\n\nTerima kasih.';
+  }
+  function waHref(r, periode) {
+    const ph = waPhone(r.hp);
+    return ph.length >= 9 ? 'https://wa.me/' + ph + '?text=' + encodeURIComponent(waText(r, periode)) : '';
+  }
+
+  function statusBadge(r) {
+    const cls = r.status === 'Lunas' ? 'lunas' : r.status === 'Belum bayar' ? 'belum' : r.status === 'Bebas tagihan' ? 'gratis' : 'notarif';
+    return `<span class="badge-s ${cls}">${esc(r.status)}</span>` +
+      (r.status === 'Lunas' ? `<span class="sub">Dibayar ${esc(r.tglBayar)}</span>` : '') +
+      (r.status === 'Bebas tagihan' && r.alasan ? `<span class="sub">${esc(r.alasan)}</span>` : '');
+  }
+
+  function renderTagihanRows() {
+    const T = state.tagihan, q = ($('#tgSearch').value || '').toLowerCase().trim();
+    const list = T.rows.filter(r =>
+      (T.filter === 'semua' || (T.filter === 'lunas' ? r.status === 'Lunas' : T.filter === 'gratis' ? r.status === 'Bebas tagihan' : (r.status === 'Belum bayar' || r.status === 'Tarif belum diatur'))) &&
+      (!q || (r.id + ' ' + r.nama + ' ' + r.hp).toLowerCase().includes(q)));
+
+    $('#tgBody').innerHTML = list.length ? list.map(r => {
+      const unpaid = r.status === 'Belum bayar' || r.status === 'Tarif belum diatur', hasTagihan = r.tagihan > 0, wa = hasTagihan ? waHref(r, T.periode) : '';
+      return `<tr>
+        <td><strong>${esc(r.nama)}</strong><span class="sub"><span class="cid">${esc(r.id)}</span> &nbsp;${esc(r.hp)}</span>
+          <span class="sub d-md-none">${esc(r.paket)}</span><span class="d-md-none">${statusBadge(r)}</span></td>
+        <td class="d-none d-md-table-cell">${esc(r.paket)}</td>
+        <td class="text-end fw-bold text-nowrap">${hasTagihan ? esc(rp(r.tagihan)) : '-'}</td>
+        <td class="d-none d-md-table-cell">${statusBadge(r)}</td>
+        <td class="text-end"><div class="act-group">
+          ${unpaid ? `<button type="button" class="btn btn-ghost btn-sm px-2" data-act="bayar" data-id="${esc(r.id)}" title="Catat pembayaran" aria-label="Catat pembayaran ${esc(r.nama)}"><i class="bi bi-cash-coin"></i></button>` : ''}
+          ${wa ? `<a class="btn btn-ghost btn-sm px-2" href="${esc(wa)}" target="_blank" rel="noopener" title="${unpaid ? 'Kirim pengingat' : 'Kirim bukti lunas'} lewat WhatsApp" aria-label="Kirim WhatsApp ke ${esc(r.nama)}"><i class="bi bi-whatsapp"></i></a>` : ''}
+          ${hasTagihan ? `<button type="button" class="btn btn-ghost btn-sm px-2" data-act="inv" data-id="${esc(r.id)}" title="Lihat invoice" aria-label="Lihat invoice ${esc(r.nama)}"><i class="bi bi-file-earmark-text"></i></button>` : ''}
+        </div></td></tr>`;
+    }).join('')
+    : `<tr><td colspan="5"><div class="empty"><i class="bi bi-receipt"></i>${T.rows.length ? 'Tidak ada pelanggan pada filter ini.' : 'Belum ada pelanggan yang ditagih di periode ini.'}</div></td></tr>`;
+  }
+  $('#tgSearch').addEventListener('input', renderTagihanRows);
+  $('#tgFilter').addEventListener('click', e => {
+    const b = e.target.closest('[data-f]'); if (!b) return;
+    state.tagihan.filter = b.dataset.f;
+    $$('#tgFilter [data-f]').forEach(x => x.classList.toggle('active', x === b));
+    renderTagihanRows();
+  });
+  $('#tgBody').addEventListener('click', e => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    if (b.dataset.act === 'bayar') startPayment(b.dataset.id); else openInvoice(b.dataset.id);
+  });
+
+  // Dari tabel tagihan langsung ke form pembayaran, terisi pelanggan, periode, dan jumlah
+  function startPayment(id) {
+    const r = state.tagihan.rows.find(x => x.id === id);
+    if (!r) return;
+    const c = state.customers.find(x => x.id === id) || { id: r.id, nama: r.nama, hp: r.hp, paket: r.paket, status: 'Aktif' };
+    const parts = state.tagihan.periode.split('-');
+    if (!Array.from($('#pTahun').options).some(o => o.value === parts[0])) $('#pTahun').insertAdjacentHTML('beforeend', `<option>${esc(parts[0])}</option>`);
+    setPayTab('input');
+    if (state.picked) clearPicked(false);
+    $('#pTahun').value = parts[0];
+    $('#pBulan').value = parts[1];
+    $('#pJumlah').value = r.tagihan > 0 ? Number(r.tagihan).toLocaleString('id-ID') : '';
+    pickCustomer(c);
+    $('#payCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* Invoice */
+  function openInvoice(id) {
+    const T = state.tagihan, r = T.rows.find(x => x.id === id);
+    if (!r) return;
+    $('#printRoot').innerHTML = '';
+    const lunas = r.status === 'Lunas', no = 'INV-' + T.periode.replace('-', '') + '-' + r.id.replace(/^3NET-/, '');
+    const logoOk = $('#logo').style.display !== 'none' && $('#logo').getAttribute('src');
+    $('#invPaper').innerHTML = `
+      <div class="inv-head">
+        ${logoOk ? `<img src="${esc($('#logo').src)}" alt="3NET">` : '<span class="inv-brand">3NET</span>'}
+        <div class="inv-title"><div class="inv-h">INVOICE</div><div>${esc(no)}</div></div>
+      </div>
+      <div class="inv-body">
+        <div class="inv-grid">
+          <div><div class="inv-k">Ditagihkan kepada</div>
+            <div class="inv-v"><strong>${esc(r.nama)}</strong><br>${esc(r.id)}<br>${esc(r.hp)}<br>${esc(r.alamat)}</div></div>
+          <div class="inv-r"><div class="inv-k">Periode tagihan</div><div class="inv-v"><strong>${esc(periodeLabel(T.periode))}</strong></div>
+            <div class="inv-k" style="margin-top:10px">Status</div><span class="inv-stamp ${lunas ? 'ok' : 'bad'}">${lunas ? 'LUNAS' : 'BELUM DIBAYAR'}</span></div>
+        </div>
+        <table class="inv-table">
+          <thead><tr><th>Deskripsi</th><th class="r">Jumlah</th></tr></thead>
+          <tbody><tr><td>Layanan internet WiFi paket ${esc(r.paket)}<br><small>Periode ${esc(periodeLabel(T.periode))}</small></td><td class="r">${esc(rp(r.tagihan))}</td></tr></tbody>
+          <tfoot>
+            <tr><td>Total tagihan</td><td class="r">${esc(rp(r.tagihan))}</td></tr>
+            ${lunas ? `<tr><td>Dibayar ${esc(r.tglBayar)}${r.metode ? ' lewat ' + esc(r.metode) : ''}</td><td class="r">${esc(rp(r.jumlahBayar))}</td></tr>` : ''}
+          </tfoot>
+        </table>
+        ${INFO_PEMBAYARAN && !lunas ? `<div class="inv-note"><strong>Cara pembayaran</strong>\n${esc(INFO_PEMBAYARAN)}</div>` : ''}
+        <div class="inv-foot">Terima kasih telah berlangganan 3NET.</div>
+      </div>`;
+    const wa = waHref(r, T.periode), a = $('#invWa');
+    a.classList.toggle('d-none', !wa);
+    if (wa) a.href = wa;
+    bootstrap.Modal.getOrCreateInstance($('#invModal')).show();
+  }
+  $('#invPrint').addEventListener('click', () => {
+    $('#printRoot').innerHTML = $('#invPaper').outerHTML.replace(' id="invPaper"', '');   // salinan tanpa id agar tidak ganda
+    window.print();
+  });
+  window.addEventListener('afterprint', () => { $('#printRoot').innerHTML = ''; });
+
+  /* Tarif paket */
+  function tarifPakets() {
+    const set = new Set([...PAKET_LIST, ...state.customers.map(c => c.paket), ...Object.keys(state.tarif), ...state.tagihan.pakets].filter(Boolean));
+    return Array.from(set).sort((a, b) => ((parseFloat(a) || 0) - (parseFloat(b) || 0)) || (a < b ? -1 : 1));
+  }
+  function openTarif() {
+    $('#tarifErr').classList.add('d-none');
+    $('#tarifRows').innerHTML = tarifPakets().map((p, i) => `
+      <div><label class="form-label" for="trf${i}">${esc(p)}</label>
+        <div class="input-group"><span class="input-group-text">Rp</span>
+          <input class="form-control" id="trf${i}" data-paket="${esc(p)}" inputmode="numeric" placeholder="Belum diatur" autocomplete="off"
+            value="${state.tarif[p] ? esc(Number(state.tarif[p]).toLocaleString('id-ID')) : ''}"></div></div>`).join('');
+    bootstrap.Modal.getOrCreateInstance($('#tarifModal')).show();
+  }
+  $$('[data-tarif]').forEach(b => b.addEventListener('click', openTarif));
+  $('#tarifRows').addEventListener('input', e => {
+    const d = e.target.value.replace(/\D/g, '').slice(0, 8);
+    e.target.value = d ? Number(d).toLocaleString('id-ID') : '';
+  });
+  $('#tarifForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const map = {};
+    $$('#tarifRows [data-paket]').forEach(i => { map[i.dataset.paket] = Number(i.value.replace(/\D/g, '')) || 0; });
+    $('#tarifErr').classList.add('d-none');
+    $('#btnTarifSave').disabled = true; $('#tarifSpin').classList.remove('d-none'); $('#tarifText').textContent = 'Menyimpan…';
+    const done = () => { $('#btnTarifSave').disabled = false; $('#tarifSpin').classList.add('d-none'); $('#tarifText').textContent = 'Simpan tarif'; };
+    google.script.run
+      .withSuccessHandler(res => {
+        done();
+        if (!res.success) {
+          if (res.code === 'AUTH') { bootstrap.Modal.getOrCreateInstance($('#tarifModal')).hide(); handleAuthLost('bayar', res.message); return; }
+          $('#tarifErr').textContent = res.message; $('#tarifErr').classList.remove('d-none'); return;
+        }
+        state.tarif = res.tarif;
+        bootstrap.Modal.getOrCreateInstance($('#tarifModal')).hide();
+        loadTagihan();
+      })
+      .withFailureHandler(err => { done(); $('#tarifErr').textContent = 'Gagal menyimpan: ' + (err && err.message ? err.message : err); $('#tarifErr').classList.remove('d-none'); })
+      .saveTarif(map, state.tokens.bayar);
+  });
+
+  /* ---------- Bebas tagihan ---------- */
+  function isFreeIn(id, periode) {
+    return state.gratis.some(g => g.id === id && g.mulai <= periode && (!g.sampai || periode <= g.sampai));
+  }
+  function loadPayTab() {
+    if (!state.auth.bayar) return;
+    if (state.payTab === 'tagihan') loadTagihan();
+    else if (state.payTab === 'gratis') loadGratis();
+  }
+  function refreshBilling() {
+    loadData();
+    if (state.tagihan.periode) loadTagihan();
+  }
+
+  function loadGratis() {
+    if (!state.auth.bayar) return;
+    const mine = ++state.gr.seq;
+    google.script.run
+      .withSuccessHandler(res => {
+        if (mine !== state.gr.seq) return;                // jawaban usang
+        if (res.code === 'AUTH') { handleAuthLost('bayar', res.message); return; }
+        renderGratis(res);
+      })
+      .withFailureHandler(e => toast('Gagal memuat daftar: ' + (e && e.message ? e.message : e)))
+      .getGratis(state.tokens.bayar);
+  }
+
+  function renderGratis(res) {
+    const r = res.ringkasan;
+    state.gr.rows = res.rows;
+    const set = (id, text) => { const el = $('#' + id); el.classList.remove('shimmer'); el.textContent = text; };
+    set('grAktif', String(r.aktif));
+    set('grNilai', rp(r.nilai));
+    $('#grNilaiNote').textContent = r.tanpaTarif > 0 ? r.tanpaTarif + ' pelanggan belum bertarif, tidak dihitung' : '';
+    set('grPersen', (r.pelangganAktif > 0 ? Math.min(100, Math.round(r.aktif / r.pelangganAktif * 100)) : 0) + '%');
+    $$('#grFilter [data-f]').forEach(b => {
+      b.textContent = (b.dataset.f === 'aktif' ? 'Berlaku (' + (r.aktif + r.belumMulai) + ')' : 'Semua (' + res.rows.length + ')');
+    });
+    renderGratisRows();
+  }
+
+  function renderGratisRows() {
+    const G = state.gr, q = ($('#grSearch').value || '').toLowerCase().trim();
+    const list = G.rows.filter(r =>
+      (G.filter === 'semua' || r.state !== 'Berakhir') &&
+      (!q || (r.id + ' ' + r.nama + ' ' + r.hp + ' ' + r.alasan).toLowerCase().includes(q)));
+    $('#grBody').innerHTML = list.length ? list.map(r => {
+      const cls = r.state === 'Aktif' ? 'gratis' : r.state === 'Belum mulai' ? 'notarif' : 'selesai';
+      const masa = periodeLabel(r.mulai) + ' - ' + (r.sampai ? periodeLabel(r.sampai) : 'seterusnya');
+      return `<tr>
+        <td><strong>${esc(r.nama)}</strong><span class="sub"><span class="cid">${esc(r.id)}</span> &nbsp;${esc(r.hp)}</span><span class="sub d-md-none">${esc(r.alasan)}</span></td>
+        <td class="d-none d-md-table-cell">${esc(r.paket || '-')}</td>
+        <td class="d-none d-md-table-cell">${esc(r.alasan)}</td>
+        <td><span class="badge-s ${cls}">${esc(r.state)}</span><span class="sub">${esc(masa)}</span></td>
+        <td class="text-end">${r.state !== 'Berakhir' ? `<button type="button" class="btn btn-ghost btn-sm px-3" data-end="${esc(r.id)}" aria-label="Akhiri bebas tagihan ${esc(r.nama)}">Akhiri</button>` : ''}</td></tr>`;
+    }).join('')
+    : `<tr><td colspan="5"><div class="empty"><i class="bi bi-gift"></i>${G.rows.length ? 'Tidak ada hasil pada filter ini.' : 'Belum ada pelanggan bebas tagihan.'}</div></td></tr>`;
+  }
+  $('#grSearch').addEventListener('input', renderGratisRows);
+  $('#grFilter').addEventListener('click', e => {
+    const b = e.target.closest('[data-f]'); if (!b) return;
+    state.gr.filter = b.dataset.f;
+    $$('#grFilter [data-f]').forEach(x => x.classList.toggle('active', x === b));
+    renderGratisRows();
+  });
+
+  // Akhiri: klik pertama minta konfirmasi di tombol itu sendiri, klik kedua (dalam 4 detik) menjalankan
+  $('#grBody').addEventListener('click', e => {
+    const b = e.target.closest('[data-end]'); if (!b) return;
+    if (b.dataset.armed !== '1') {
+      b.dataset.armed = '1'; b.classList.add('armed'); b.textContent = 'Yakin?';
+      b.setAttribute('aria-label', 'Yakin akhiri bebas tagihan? Klik sekali lagi untuk konfirmasi');
+      setTimeout(() => { if (b.isConnected && !b.disabled) { b.dataset.armed = ''; b.classList.remove('armed'); b.textContent = 'Akhiri'; } }, 4000);
+      return;
+    }
+    b.disabled = true;
+    google.script.run
+      .withSuccessHandler(res => {
+        if (!res.success) {
+          if (res.code === 'AUTH') { handleAuthLost('bayar', res.message); return; }
+          b.disabled = false; toast(res.message); return;
+        }
+        loadGratis(); refreshBilling();
+      })
+      .withFailureHandler(err => { b.disabled = false; toast('Gagal: ' + (err && err.message ? err.message : err)); })
+      .akhiriGratis(b.dataset.end, state.tokens.bayar);
+  });
+
+  /* Dialog tambah */
+  (function () {
+    const y = new Date().getFullYear();
+    const bulan = BULAN.map((b, i) => `<option value="${String(i + 1).padStart(2, '0')}">${b}</option>`).join('');
+    const tahun = [y - 1, y, y + 1, y + 2, y + 3].map(v => `<option>${v}</option>`).join('');
+    ['grMulai', 'grSampai'].forEach(k => { $('#' + k + 'Bulan').innerHTML = bulan; $('#' + k + 'Tahun').innerHTML = tahun; });
+  })();
+  function grPeriode(k) { return $('#' + k + 'Tahun').value + '-' + $('#' + k + 'Bulan').value; }
+  function setGrDefaults() {
+    const n = new Date(), b = String(n.getMonth() + 1).padStart(2, '0'), t = String(n.getFullYear());
+    ['grMulai', 'grSampai'].forEach(k => { $('#' + k + 'Bulan').value = b; $('#' + k + 'Tahun').value = t; });
+  }
+  function grErr(msg) { $('#grErr').textContent = msg || ''; $('#grErr').classList.toggle('d-none', !msg); }
+  function closeGrResults() { $('#grResults').classList.remove('open'); }
+
+  $('#btnGrAdd').addEventListener('click', () => {
+    state.gr.picked = null;
+    $('#gratisForm').reset();
+    $('#grPicked').classList.remove('show'); $('#grPicker').classList.remove('d-none');
+    $('#grSampaiWrap').classList.add('d-none');
+    setGrDefaults(); grErr(''); closeGrResults();
+    bootstrap.Modal.getOrCreateInstance($('#gratisModal')).show();
+    setTimeout(() => $('#grCari').focus(), 300);
+  });
+
+  function grShow(q) {
+    q = (q || '').toLowerCase().trim();
+    const taken = new Set(state.gr.rows.filter(r => r.state !== 'Berakhir').map(r => r.id));
+    const list = (q ? state.customers.filter(c => (c.id + ' ' + c.nama + ' ' + c.hp).toLowerCase().includes(q)) : state.customers).slice(0, 8);
+    state.gr.items = list;
+    $('#grResults').innerHTML = list.length
+      ? list.map((c, i) => `<button type="button" class="pick" data-i="${i}" ${taken.has(c.id) ? 'disabled' : ''}>
+          <span><strong>${esc(c.nama)}</strong><span class="sub"><span class="cid">${esc(c.id)}</span> &nbsp;${esc(c.hp)}</span></span>
+          ${taken.has(c.id) ? '<span class="badge-s gratis">Sudah bebas</span>' : badge(c.status)}</button>`).join('')
+      : '<div class="empty py-3">Pelanggan tidak ditemukan.</div>';
+    $('#grResults').classList.add('open');
+  }
+  $('#grCari').addEventListener('input', e => grShow(e.target.value));
+  $('#grCari').addEventListener('focus', e => grShow(e.target.value));
+  $('#grResults').addEventListener('click', e => {
+    const b = e.target.closest('.pick');
+    if (!b || b.disabled) return;
+    const c = state.gr.items[+b.dataset.i]; if (!c) return;
+    state.gr.picked = c;
+    $('#grAvatar').textContent = (c.nama.trim().charAt(0) || '?').toUpperCase();
+    $('#grPkNama').textContent = c.nama;
+    $('#grPkSub').innerHTML = `<span class="cid">${esc(c.id)}</span> &nbsp;${esc(c.hp)} &nbsp;${esc(c.paket)}`;
+    $('#grPicked').classList.add('show'); $('#grPicker').classList.add('d-none');
+    closeGrResults(); grErr('');
+  });
+  $('#grChange').addEventListener('click', () => {
+    state.gr.picked = null;
+    $('#grPicked').classList.remove('show'); $('#grPicker').classList.remove('d-none');
+    $('#grCari').value = ''; $('#grCari').focus();
+  });
+  document.addEventListener('click', e => { if (!$('#grPicker').contains(e.target)) closeGrResults(); });
+  $('#grBatas').addEventListener('change', () => {
+    const on = $('#grBatas').checked;
+    $('#grSampaiWrap').classList.toggle('d-none', !on);
+    if (on) { $('#grSampaiBulan').value = $('#grMulaiBulan').value; $('#grSampaiTahun').value = $('#grMulaiTahun').value; }
+  });
+
+  $('#gratisForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const G = state.gr;
+    if (!G.picked) { grErr('Pilih pelanggan terlebih dahulu.'); return; }
+    const alasan = $('#grAlasan').value.trim();
+    if (alasan.length < 3) { grErr('Alasan minimal 3 karakter.'); return; }
+    const mulai = grPeriode('grMulai'), sampai = $('#grBatas').checked ? grPeriode('grSampai') : '';
+    if (sampai && sampai < mulai) { grErr('Periode akhir tidak boleh sebelum periode mulai.'); return; }
+    grErr('');
+    $('#btnGrSave').disabled = true; $('#grSpin').classList.remove('d-none'); $('#grText').textContent = 'Menyimpan…';
+    const done = () => { $('#btnGrSave').disabled = false; $('#grSpin').classList.add('d-none'); $('#grText').textContent = 'Simpan'; };
+    google.script.run
+      .withSuccessHandler(res => {
+        done();
+        if (!res.success) {
+          if (res.code === 'AUTH') { bootstrap.Modal.getOrCreateInstance($('#gratisModal')).hide(); handleAuthLost('bayar', res.message); return; }
+          grErr(res.message); return;
+        }
+        bootstrap.Modal.getOrCreateInstance($('#gratisModal')).hide();
+        loadGratis(); refreshBilling();
+      })
+      .withFailureHandler(err => { done(); grErr('Gagal menyimpan: ' + (err && err.message ? err.message : err)); })
+      .saveGratis({ idp: G.picked.id, mulai: mulai, sampai: sampai, alasan: alasan }, state.tokens.bayar);
+  });
+
+  /* ---------- Init ---------- */
+  Object.keys(AUTH).forEach(sc => { try { state.tokens[sc] = sessionStorage.getItem(AUTH[sc].key); } catch (e) { /* abaikan */ } });
+  setToday();
+  loadData();
+</script>
+</body>
+</html>
